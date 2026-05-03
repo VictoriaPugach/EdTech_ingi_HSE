@@ -1,0 +1,184 @@
+# =========================================================================
+#  Educational Platform for Collaborative Programming (CRDT + Hint Engine)
+#  Корневой .gitignore для монорепо (Node + Python + Docker)
+# =========================================================================
+
+# ---------- Node.js / npm / pnpm / yarn ----------
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.lerna-debug.log*
+package-lock.json.bak
+
+# ---------- TypeScript ----------
+*.tsbuildinfo
+.tsbuild/
+
+# ---------- Build outputs ----------
+dist/
+build/
+out/
+.next/
+.nuxt/
+.turbo/
+.cache/
+.parcel-cache/
+.vite/
+
+# ---------- React / Vite ----------
+apps/web/dist/
+apps/web/.vite/
+
+# ---------- Test / coverage ----------
+coverage/
+*.lcov
+.nyc_output/
+.vitest-cache/
+junit.xml
+playwright-report/
+test-results/
+playwright/.cache/
+
+# ---------- Linters / formatters caches ----------
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+build/
+develop-eggs/
+downloads/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+.installed.cfg
+MANIFEST
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Python testing & tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Python packaging
+pip-log.txt
+pip-delete-this-directory.txt
+.pdm.toml
+__pypackages__/
+
+# ---------- Prisma ----------
+# Сами миграции коммитим, но локальные dev-артефакты — нет
+apps/api-gateway/prisma/dev.db
+apps/api-gateway/prisma/dev.db-journal
+apps/api-gateway/prisma/migrations/dev/
+.prisma/
+
+# ---------- Tree-sitter (нативные сборки парсеров) ----------
+*.so
+*.dylib
+*.dll
+build/Release/
+
+# ---------- Docker / Compose ----------
+# volumes, dump-ы, runtime-данные
+.docker/
+docker-data/
+postgres-data/
+redis-data/
+**/.docker-volumes/
+docker-compose.override.yml
+
+# ---------- Environment / секреты ----------
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+!.env.example
+
+# ---------- IDE / editors ----------
+.vscode/
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+.history/
+.fleet/
+
+# ---------- OS ----------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ---------- Логи и временные ----------
+*.log
+logs/
+tmp/
+temp/
+.tmp/
+.temp/
+
+# ---------- Cursor / AI / агентские ----------
+.cursor/projects/*/terminals/
+.cursor/scratch/
+.cursor/agent-transcripts/
+.cursorignore.local
+
+# ---------- Документация курсовой / неисходники проекта ----------
+# Папка с документами курсовой и черновиками — не в git репозитория проекта
+/docs-private/
+*.pdf
+!docs/**/*.pdf

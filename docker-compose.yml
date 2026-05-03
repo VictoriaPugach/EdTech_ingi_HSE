@@ -1,0 +1,166 @@
+# =============================================================================
+#  EdTech Collab — Dev окружение
+#  Поднимает все 4 сервиса + Postgres 16 + Redis 7 одной командой:
+#      docker compose up --build
+#
+#  Префикс контейнеров: edtech-*
+#  Внутренняя сеть: edtech-net
+#  Все volume-ы названы (named volumes), чтобы данные пережили `compose down`.
+#  Полный сброс: `docker compose down -v`.
+# =============================================================================
+
+name: edtech
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 16 — основная БД (BC-3 LMS, BC-1 snapshots)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: edtech-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-edtech}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edtech_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-edtech}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-edtech} -d ${POSTGRES_DB:-edtech}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
+  # Redis 7 — Pub/Sub для CRDT broadcast + кэш (НФТ-2)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: edtech-redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
+  # API Gateway / LMS (BC-3) — Node.js + Fastify + Prisma + JWT
+  # ---------------------------------------------------------------------------
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+      target: dev
+    container_name: edtech-api-gateway
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      GATEWAY_PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-edtech}:${POSTGRES_PASSWORD:-edtech_dev_password}@postgres:5432/${POSTGRES_DB:-edtech}?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-use-32-bytes-of-randomness}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-24h}
+      HINT_SERVICE_URL: http://hint-service:4002
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./apps/api-gateway:/app/apps/api-gateway
+      - ./packages/shared:/app/packages/shared
+      # Зависимости только в корне монорепо (npm workspaces)
+      - /app/node_modules
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
+  # Realtime Sync (BC-1) — Node.js + ws + Yjs WebSocket-сервер
+  # ---------------------------------------------------------------------------
+  realtime-sync:
+    build:
+      context: .
+      dockerfile: apps/realtime-sync/Dockerfile
+      target: dev
+    container_name: edtech-realtime-sync
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      REALTIME_PORT: 4001
+      REALTIME_WS_PATH: ${REALTIME_WS_PATH:-/ws}
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER:-edtech}:${POSTGRES_PASSWORD:-edtech_dev_password}@postgres:5432/${POSTGRES_DB:-edtech}?schema=public
+    ports:
+      - '4001:4001'
+    volumes:
+      - ./apps/realtime-sync:/app/apps/realtime-sync
+      - ./packages/shared:/app/packages/shared
+      - /app/node_modules
+    depends_on:
+      redis:    { condition: service_healthy }
+      postgres: { condition: service_healthy }
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
+  # Hint Service (BC-2) — Python + FastAPI + Tree-sitter
+  # ---------------------------------------------------------------------------
+  hint-service:
+    build:
+      context: ./apps/hint-service
+      dockerfile: Dockerfile
+      target: dev
+    container_name: edtech-hint-service
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      HINT_SERVICE_PORT: 4002
+    ports:
+      - '4002:4002'
+    volumes:
+      - ./apps/hint-service:/app
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
+  # Web SPA (BC-3 client) — React + Vite + CodeMirror 6 + Yjs
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: dev
+    container_name: edtech-web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:4000
+      VITE_WS_URL: ws://localhost:4001/ws
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages/shared:/app/packages/shared
+      - /app/node_modules
+    depends_on:
+      - api-gateway
+      - realtime-sync
+    networks: [edtech-net]
+
+# ----------------------------------------------------------------------------
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  edtech-net:
+    driver: bridge
