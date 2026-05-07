@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from tree_sitter import Language, Parser
-import tree_sitter_python
 import tree_sitter_javascript
+import tree_sitter_python
+from tree_sitter import Language, Parser
 
 
 @lru_cache(maxsize=8)
