@@ -1,0 +1,71 @@
+@use 'variables' as *;
+
+// =============================================================================
+//  Mixins — переиспользуемые вспомогательные блоки
+// =============================================================================
+
+// --- Responsive breakpoints --------------------------------------------------
+@mixin sm  { @media (min-width: $bp-sm)  { @content; } }
+@mixin md  { @media (min-width: $bp-md)  { @content; } }
+@mixin lg  { @media (min-width: $bp-lg)  { @content; } }
+@mixin xl  { @media (min-width: $bp-xl)  { @content; } }
+@mixin max-sm { @media (max-width: #{$bp-sm - 1})  { @content; } }
+@mixin max-md { @media (max-width: #{$bp-md - 1})  { @content; } }
+
+// --- Flex helpers ------------------------------------------------------------
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+// --- Focus ring (accessible) -------------------------------------------------
+@mixin focus-ring($color: $color-primary) {
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: 2px;
+  }
+}
+
+// --- Truncate text -----------------------------------------------------------
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// --- Card surface ------------------------------------------------------------
+@mixin card($radius: $radius-2xl, $shadow: $shadow-card) {
+  background: $color-surface;
+  border-radius: $radius;
+  box-shadow: $shadow;
+}
+
+// --- Smooth transition -------------------------------------------------------
+@mixin transition($props: all, $duration: $transition-normal) {
+  transition: $props $duration;
+}
+
+// --- Visually hidden (accessible) --------------------------------------------
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

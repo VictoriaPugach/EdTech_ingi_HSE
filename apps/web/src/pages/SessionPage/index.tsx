@@ -10,7 +10,6 @@ import { yCollab } from 'y-codemirror.next';
 
 const WS_URL = (import.meta.env.VITE_WS_URL as string) || 'ws://localhost:4001/ws';
 
-/** Случайный приветливый ник для awareness — пока без auth. */
 function randomUser() {
   const names = ['Кот', 'Лиса', 'Енот', 'Панда', 'Жираф', 'Медведь', 'Сова', 'Дельфин'];
   const colors = ['#ff7a59', '#1f9aff', '#52b6ff', '#7bd389', '#f5a623', '#a06cd5', '#ff6b9d'];
@@ -38,7 +37,6 @@ export function SessionPage() {
 
     const ydoc = new Y.Doc();
     const provider = new WebsocketProvider(WS_URL, sessionId, ydoc, {
-      // Передаём session в query — наш сервер умеет извлекать оба варианта
       params: { session: sessionId },
       connect: true,
     });
@@ -49,7 +47,6 @@ export function SessionPage() {
       else setStatus('connecting');
     });
 
-    // Сообщаем серверу нашу awareness-инфу (ник и цвет курсора)
     provider.awareness.setLocalStateField('user', me);
 
     const updateUsers = () => {
@@ -65,8 +62,6 @@ export function SessionPage() {
 
     const yText = ydoc.getText('codemirror');
 
-    // Если документ пустой — пишем приветственный шаблон (только первый клиент это сделает,
-    // дальнейшие подгрузят состояние из CRDT). Используем событие 'sync' (y-websocket v2 API).
     const onSync = (isSynced: boolean) => {
       if (!isSynced) return;
       if (yText.length === 0) {
@@ -108,12 +103,10 @@ export function SessionPage() {
       provider.destroy();
       ydoc.destroy();
     };
-    // sessionId — единственная зависимость; me стабилен (useMemo)
   }, [sessionId, me]);
 
   return (
     <div className="flex h-full flex-col bg-white">
-      {/* Шапка сессии */}
       <div className="flex items-center justify-between border-b bg-brand-100/50 px-4 py-2">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-slate-700">Сессия:</span>
@@ -137,8 +130,7 @@ export function SessionPage() {
       <div ref={editorHostRef} className="flex-1 overflow-auto" />
 
       <footer className="border-t bg-slate-50 px-4 py-2 text-xs text-slate-500">
-        CRDT через Yjs · WebSocket к <code className="font-mono">{WS_URL}</code> · Подсказки
-        пока в разработке
+        CRDT через Yjs · WebSocket к <code className="font-mono">{WS_URL}</code> · Подсказки пока в разработке
       </footer>
     </div>
   );
@@ -147,8 +139,8 @@ export function SessionPage() {
 function ConnectionBadge({ status }: { status: 'connecting' | 'connected' | 'disconnected' }) {
   const map = {
     connecting: { label: 'Подключаюсь…', cls: 'bg-yellow-100 text-yellow-700' },
-    connected: { label: 'На связи', cls: 'bg-green-100 text-green-700' },
-    disconnected: { label: 'Отключено', cls: 'bg-red-100 text-red-700' },
+    connected:  { label: 'На связи',     cls: 'bg-green-100 text-green-700'  },
+    disconnected: { label: 'Отключено',  cls: 'bg-red-100 text-red-700'      },
   } as const;
   const { label, cls } = map[status];
   return <span className={`rounded-full px-3 py-1 text-xs font-semibold ${cls}`}>{label}</span>;

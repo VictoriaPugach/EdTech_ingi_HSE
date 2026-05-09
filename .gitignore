@@ -172,6 +172,7 @@ temp/
 .temp/
 
 # ---------- Cursor / AI / агентские ----------
+.cursor/
 .cursor/projects/*/terminals/
 .cursor/scratch/
 .cursor/agent-transcripts/

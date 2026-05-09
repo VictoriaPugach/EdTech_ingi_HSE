@@ -1,0 +1,119 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.wrapper {
+  @include flex-col;
+  gap: $space-1;
+  width: 100%;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: $space-3 $space-4;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-xl;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-text-primary;
+  background: $color-surface;
+  @include transition(border-color, box-shadow);
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: darken($color-border, 10%);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+  }
+
+  &:disabled {
+    background: $color-bg;
+    color: $color-text-muted;
+    cursor: not-allowed;
+  }
+
+  &.hasLeftIcon {
+    padding-left: $space-10;
+  }
+
+  &.hasRightIcon {
+    padding-right: $space-10;
+  }
+
+  &.error {
+    border-color: $color-error;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($color-error, 0.12);
+    }
+  }
+}
+
+.iconLeft,
+.iconRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $color-text-muted;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.iconLeft  { left:  $space-3; }
+.iconRight { right: $space-3; pointer-events: auto; }
+
+.iconRightBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: $color-text-muted;
+  display: flex;
+  align-items: center;
+  @include transition(color);
+  @include focus-ring;
+
+  &:hover {
+    color: $color-text-primary;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.errorMessage {
+  font-size: $font-size-xs;
+  color: $color-error;
+  margin-top: $space-1;
+}
+
+.hint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
