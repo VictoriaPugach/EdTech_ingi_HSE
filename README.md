@@ -103,7 +103,13 @@ cp .env.example .env
 docker compose up --build
 
 # 3) В новом терминале — применить миграции БД
-docker compose exec api-gateway npx prisma migrate dev --name init
+docker compose exec api-gateway npx prisma migrate deploy
+```
+
+### Запуск одной командой (up + migrate + seed)
+
+```bash
+npm run dev:up
 ```
 
 После запуска:
@@ -165,7 +171,7 @@ docker compose restart realtime-sync
 docker compose exec api-gateway sh
 
 # Запустить миграции Prisma
-docker compose exec api-gateway npx prisma migrate dev
+docker compose exec api-gateway npx prisma migrate deploy
 ```
 
 ---

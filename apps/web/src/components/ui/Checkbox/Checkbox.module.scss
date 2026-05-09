@@ -1,0 +1,68 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover .box {
+    border-color: $color-primary;
+  }
+}
+
+.hiddenInput {
+  @include sr-only;
+
+  &:checked + .box {
+    background: $color-primary;
+    border-color: $color-primary;
+
+    .check {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &:focus-visible + .box {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &:disabled + .box {
+    background: $color-bg;
+    border-color: $color-border;
+    cursor: not-allowed;
+  }
+}
+
+.box {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid $color-border;
+  border-radius: $radius-sm;
+  background: $color-surface;
+  @include flex-center;
+  @include transition(all);
+}
+
+.check {
+  opacity: 0;
+  transform: scale(0.6);
+  @include transition(all);
+  color: $color-text-inverse;
+
+  svg {
+    width: 11px;
+    height: 11px;
+    stroke-width: 3;
+  }
+}
+
+.labelText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}

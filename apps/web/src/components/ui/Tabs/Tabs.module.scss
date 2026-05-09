@@ -1,0 +1,58 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.list {
+  display: flex;
+  border-bottom: 2px solid $color-border;
+  gap: $space-1;
+  justify-content: center;
+}
+
+.tab {
+  position: relative;
+  padding: $space-3 $space-5;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  background: none;
+  border: none;
+  cursor: pointer;
+  @include transition(color);
+
+  @include focus-ring;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: $color-primary;
+    transform: scaleX(0);
+    @include transition(transform);
+    transform-origin: center;
+  }
+
+  &:hover {
+    color: $color-text-primary;
+  }
+
+  &.active {
+    color: $color-primary;
+
+    &::after {
+      transform: scaleX(1);
+    }
+  }
+}
+
+.panel {
+  padding-top: $space-6;
+}
