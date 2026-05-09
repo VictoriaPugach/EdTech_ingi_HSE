@@ -2,12 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * Главная страница (MVP).
- * Пока без реальной авторизации — генерирует случайный sessionId
- * и кидает в редактор. На следующей итерации:
- *   - login / register;
- *   - создание сессии через API Gateway (/api/sessions);
- *   - список «Мои сессии» (ФТ-13).
+ * Главная страница.
+ * Создаёт или присоединяется к сессии совместного редактирования.
+ * TODO: интеграция с API сессий (/sessions), список «Мои сессии» (ФТ-13).
  */
 export function HomePage() {
   const navigate = useNavigate();
@@ -64,7 +61,7 @@ export function HomePage() {
       </div>
 
       <p className="mt-10 text-sm text-slate-500">
-        Это базовая версия. Скоро появятся: вход, проекты, видеосвязь, геймификация.
+        Это базовая версия. Скоро появятся: проекты, видеосвязь, геймификация.
       </p>
     </div>
   );
