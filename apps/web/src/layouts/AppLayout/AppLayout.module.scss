@@ -1,15 +1,22 @@
 @use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
 
 .layout {
   display: flex;
   align-items: stretch;
   min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background: $color-bg;
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  @include hide-scrollbar;
   padding: $space-6 $space-8;
 
   @media (max-width: #{$bp-lg - 1}) {

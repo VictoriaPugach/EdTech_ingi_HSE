@@ -18,6 +18,7 @@
   "scripts": {
     "dev": "docker compose up --build",
     "dev:up": "node scripts/dev-up.mjs",
+    "docker:build:plain": "docker compose build --progress=plain",
     "dev:down": "docker compose down",
     "dev:clean": "docker compose down -v",
     "dev:logs": "docker compose logs -f",

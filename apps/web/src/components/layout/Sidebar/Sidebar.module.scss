@@ -8,20 +8,27 @@
 
 .sidebar {
   @include flex-col;
-  gap: $space-6;
+  gap: $space-5;
   width: 260px;
   flex-shrink: 0;
   height: 100vh;
+  max-height: 100vh;
   position: sticky;
   top: 0;
-  padding: $space-6 $space-5;
+  padding: $space-5 $space-5 $space-4;
   background: $color-surface;
   border-right: 1px solid $color-border-soft;
   overflow-y: auto;
-  scrollbar-width: thin;
+  @include hide-scrollbar;
 
-  // дочерние блоки разделяем тонкими разделителями.
-  > * { flex-shrink: 0; }
+  > * {
+    flex-shrink: 0;
+  }
+
+  // Карточка профиля прижимается к низу, если по высоте есть запас.
+  > *:last-child {
+    margin-top: auto;
+  }
 }
 
 // --- Logo --------------------------------------------------------------------

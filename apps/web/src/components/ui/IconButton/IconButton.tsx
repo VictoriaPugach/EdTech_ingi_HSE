@@ -14,8 +14,8 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Круглая кнопка-иконка. Используется в шапке (профиль/настройки/нотификации)
- * и в любых местах, где нужна одиночная иконка-действие.
+ * Кнопка с иконкой (скруглённый квадрат / squircle с фоном по макету).
+ * Используется в шапке и везде, где нужна компактная иконка-действие.
  */
 export function IconButton({
   variant = 'surface',
