@@ -1,0 +1,29 @@
+@use '../../styles/variables' as *;
+
+.layout {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  background: $color-bg;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: $space-6 $space-8;
+
+  @media (max-width: #{$bp-lg - 1}) {
+    padding: $space-4;
+  }
+}
+
+// Полноэкранный режим (для редактора кода).
+.fullHeight {
+  height: 100vh;
+  overflow: hidden;
+
+  .main {
+    overflow: hidden;
+    padding: 0;
+  }
+}

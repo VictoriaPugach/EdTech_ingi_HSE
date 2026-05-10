@@ -1,0 +1,119 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+// =============================================================================
+//  QuickActions row
+// =============================================================================
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-3;
+
+  @media (max-width: #{$bp-xl - 1}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: #{$bp-md - 1}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// --- Card --------------------------------------------------------------------
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-4;
+  border-radius: $radius-xl;
+  border: 1px solid $color-border-soft;
+  background: $color-surface;
+  min-height: 170px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-3;
+}
+
+.headText {
+  @include flex-col;
+  gap: $space-1;
+  min-width: 0;
+}
+
+.caption {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  line-height: 1.3;
+}
+
+.caption-primary { color: $color-primary; font-weight: $font-weight-semibold; }
+.caption-muted   { color: $color-text-muted; }
+
+.title {
+  font-family: $font-family-heading;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.description {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.45;
+  margin: 0;
+}
+
+// --- Illustration ------------------------------------------------------------
+.illustration {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img { width: 100%; height: 100%; object-fit: contain; }
+}
+
+.iconImg { width: 38px; height: 38px; }
+
+// --- Footer slot -------------------------------------------------------------
+.footer {
+  margin-top: auto;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.progressValue {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  min-width: 32px;
+  text-align: right;
+}
+
+// --- Solve button (yellow accent) -------------------------------------------
+.solveBtn {
+  background: $color-accent-yellow !important;
+  border-color: $color-accent-yellow !important;
+  color: $color-text-primary !important;
+
+  &:hover:not(:disabled) {
+    background: $color-accent-yellow-h !important;
+    border-color: $color-accent-yellow-h !important;
+  }
+}

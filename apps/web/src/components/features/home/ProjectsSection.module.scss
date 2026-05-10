@@ -1,0 +1,77 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-3;
+
+  @media (max-width: #{$bp-md - 1}) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: #{$bp-sm - 1}) { grid-template-columns: 1fr; }
+}
+
+// --- Tile --------------------------------------------------------------------
+.tile {
+  @include flex-col;
+  gap: $space-2;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  @include transition(transform);
+  @include focus-ring;
+
+  &:hover .cover {
+    border-color: $color-primary-stroke;
+    transform: translateY(-2px);
+  }
+}
+
+.cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: $radius-xl;
+  background: $color-primary-subtle;
+  border: 1px solid $color-border-soft;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include transition(border-color, transform);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.tileTitle {
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  padding: 0 $space-1;
+}
+
+.tileMeta {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  padding: 0 $space-1;
+}
+
+// --- Create tile -------------------------------------------------------------
+.createTile {
+  &:hover .createCover {
+    background: $color-primary-light;
+  }
+}
+
+.createCover {
+  background: $color-primary-subtle;
+  color: $color-primary;
+  border: 1px dashed $color-primary-stroke;
+}

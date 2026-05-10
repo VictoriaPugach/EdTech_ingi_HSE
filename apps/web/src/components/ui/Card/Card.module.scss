@@ -1,0 +1,32 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.card {
+  background: $color-surface;
+  position: relative;
+  @include transition(all);
+}
+
+// --- Borders -----------------------------------------------------------------
+.bordered { border: 1px solid $color-border-soft; }
+
+// --- Hover -------------------------------------------------------------------
+.hoverable {
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-primary-stroke;
+    box-shadow: $shadow-card;
+  }
+}
+
+// --- Radius ------------------------------------------------------------------
+.radius-md { border-radius: $radius-lg;   } // 12px
+.radius-lg { border-radius: $radius-xl;   } // 16px
+.radius-xl { border-radius: $radius-2xl;  } // 20px
+
+// --- Padding -----------------------------------------------------------------
+.pad-none { padding: 0; }
+.pad-sm   { padding: $space-3; }
+.pad-md   { padding: $space-5; }
+.pad-lg   { padding: $space-6; }

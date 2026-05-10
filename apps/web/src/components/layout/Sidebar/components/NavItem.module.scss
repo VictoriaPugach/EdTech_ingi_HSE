@@ -1,0 +1,47 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-radius: $radius-lg;
+  color: $color-text-secondary;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  text-decoration: none;
+  @include transition(background-color, color);
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background: $color-primary-hovered;
+    color: $color-primary;
+    text-decoration: none;
+  }
+
+  @include focus-ring;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+
+  > svg, > img { width: 20px; height: 20px; }
+}
+
+.label { @include truncate; }
+
+// --- Active ------------------------------------------------------------------
+.active {
+  background: $color-primary-light;
+  color: $color-primary;
+
+  &:hover { background: $color-primary-light; }
+}

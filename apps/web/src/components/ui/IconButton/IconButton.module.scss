@@ -1,0 +1,61 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: $color-primary;
+  @include transition(all);
+  @include focus-ring;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// --- Sizes -------------------------------------------------------------------
+.s-sm { width: 32px; height: 32px; }
+.s-md { width: 40px; height: 40px; }
+
+// --- Variants ----------------------------------------------------------------
+.v-surface {
+  background: $color-surface;
+  border-color: $color-border-soft;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hovered;
+    border-color: $color-primary-stroke;
+  }
+}
+
+.v-soft {
+  background: $color-primary-light;
+
+  &:hover:not(:disabled) {
+    background: darken($color-primary-light, 4%);
+  }
+}
+
+.v-ghost {
+  background: transparent;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hovered;
+  }
+}
+
+// --- Icon --------------------------------------------------------------------
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  > svg, > img { width: 20px; height: 20px; }
+}
+
+.s-sm .icon > svg, .s-sm .icon > img { width: 16px; height: 16px; }

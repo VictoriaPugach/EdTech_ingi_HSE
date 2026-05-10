@@ -1,0 +1,66 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+.section {
+  @include flex-col;
+  gap: $space-3;
+}
+
+.caption {
+  font-family: $font-family-base;
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.06em;
+  color: $color-text-muted;
+  text-transform: uppercase;
+}
+
+.card {
+  @include flex-col;
+  gap: $space-3;
+  padding: $space-4;
+  border-radius: $radius-xl;
+  border: 1px solid $color-border-soft;
+  background: $color-surface;
+}
+
+.tone-primary { background: $color-primary-subtle; }
+.tone-success {
+  background: $color-secondary-light;
+  border-color: rgba($color-secondary-dark, 0.2);
+}
+
+.row { @include flex-between; align-items: flex-start; gap: $space-2; }
+
+.text {
+  @include flex-col;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-family: $font-family-heading;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.subtitle {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: $color-primary;
+  flex-shrink: 0;
+
+  .tone-success & { color: $color-secondary-dark; }
+
+  > svg, > img { width: 20px; height: 20px; }
+}

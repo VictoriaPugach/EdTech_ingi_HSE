@@ -1,0 +1,94 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.list {
+  @include flex-col;
+  gap: $space-5;
+}
+
+.day {
+  @include flex-col;
+  gap: $space-2;
+}
+
+.dayLabel {
+  margin: 0;
+  font-family: $font-family-heading;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.entries {
+  @include flex-col;
+  gap: $space-2;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-radius: $radius-lg;
+  border: 1px solid $color-border-soft;
+  background: $color-surface;
+  @include transition(border-color, background-color);
+
+  &:hover {
+    border-color: $color-primary-stroke;
+    background: $color-primary-subtle;
+  }
+}
+
+.time {
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.entryText {
+  @include flex-col;
+  gap: 2px;
+  min-width: 0;
+}
+
+.entryTitle {
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.entryType {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+// --- See all link ------------------------------------------------------------
+.seeAll {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  margin-top: $space-4;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  cursor: pointer;
+  align-self: flex-start;
+  @include transition(opacity);
+
+  &:hover { opacity: 0.75; text-decoration: underline; }
+}

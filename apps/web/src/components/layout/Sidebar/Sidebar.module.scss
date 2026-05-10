@@ -1,0 +1,49 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+// =============================================================================
+//  Sidebar — фиксированная левая панель.
+//  Размещается через AppLayout (position: sticky, height = 100vh).
+// =============================================================================
+
+.sidebar {
+  @include flex-col;
+  gap: $space-6;
+  width: 260px;
+  flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  padding: $space-6 $space-5;
+  background: $color-surface;
+  border-right: 1px solid $color-border-soft;
+  overflow-y: auto;
+  scrollbar-width: thin;
+
+  // дочерние блоки разделяем тонкими разделителями.
+  > * { flex-shrink: 0; }
+}
+
+// --- Logo --------------------------------------------------------------------
+.logo {
+  padding: $space-1 $space-2 $space-3;
+}
+
+.logoImg {
+  height: 36px;
+  width: auto;
+}
+
+// --- Nav ---------------------------------------------------------------------
+.nav {
+  @include flex-col;
+  gap: 4px;
+  padding-bottom: $space-5;
+  border-bottom: 1px solid $color-border-soft;
+}
+
+// --- Stats wrapper -----------------------------------------------------------
+.stats {
+  @include flex-col;
+  gap: $space-5;
+}
