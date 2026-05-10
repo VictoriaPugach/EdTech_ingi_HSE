@@ -4,25 +4,37 @@
 // =============================================================================
 
 // --- Palette -----------------------------------------------------------------
-$color-primary:        #7B5BF4;
+//  Согласовано с Figma-токенами (см. дизайн-макет дашборда):
+//  --main #7B5BF4, --soft-purple #EFECFD, --hovered #F3F0FD, --light-violet #F9F8FE,
+//  --grey-violet #F0EBF4, --stroke-violet #B1A7FD,
+//  --textdark #051A5B, --textp #49567B, --dark-grey #868295, --grey #DFDCE2,
+//  --green #BFE5CF, --greendark #4AB179, --light-green #E1F4E8, --blue #EAF3FE.
+$color-primary:        #7B5BF4;   // --main
 $color-primary-hover:  #6B4BE4;
-$color-primary-light:  #EDE9FE;
-$color-primary-subtle: #F5F3FF;
+$color-primary-light:  #EFECFD;   // --soft-purple
+$color-primary-subtle: #F9F8FE;   // --light-violet
+$color-primary-stroke: #B1A7FD;   // --stroke-violet
+$color-primary-hovered:#F3F0FD;   // --hovered
 
-$color-secondary:      #BFE5CF;
-$color-secondary-dark: #4CA87A;
-$color-secondary-light:#E8F7EF;
+$color-secondary:      #BFE5CF;   // --green
+$color-secondary-dark: #4AB179;   // --greendark (используется в LOGO)
+$color-secondary-light:#E1F4E8;   // --light-green
+
+$color-accent-blue:    #EAF3FE;   // --blue (карточки практики)
+$color-accent-yellow:  #FFD24C;   // акцент-кнопка «Решить»
+$color-accent-yellow-h:#F5C038;
 
 $color-bg:             #F7F8FD;
 $color-surface:        #FFFFFF;
 $color-surface-hover:  #F9F9FE;
 
-$color-text-primary:   #1A1A2E;
-$color-text-secondary: #6B7280;
-$color-text-muted:     #9CA3AF;
+$color-text-primary:   #051A5B;   // --textdark
+$color-text-secondary: #49567B;   // --textp
+$color-text-muted:     #868295;   // --dark-grey
 $color-text-inverse:   #FFFFFF;
 
-$color-border:         #E5E7EB;
+$color-border:         #DFDCE2;   // --grey
+$color-border-soft:    #F0EBF4;   // --grey-violet
 $color-border-focus:   $color-primary;
 
 $color-error:          #EF4444;

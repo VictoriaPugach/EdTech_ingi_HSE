@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # =============================================================================
 #  API Gateway (BC-3) — Node.js + Fastify + Prisma
 #  Multi-stage: dev (с tsx watch) и prod (скомпилированный JS).
@@ -5,16 +6,22 @@
 # =============================================================================
 
 # ---------- base ----------
-FROM node:20-alpine AS base
+# bookworm-slim: без Alpine/apk — меньше сбоев при нестабильном DNS к dl-cdn.alpinelinux.org
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache openssl libc6-compat
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # ---------- deps (общие для dev и prod) ----------
 FROM base AS deps
 COPY package.json package-lock.json* ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/api-gateway/package.json apps/api-gateway/
-RUN npm install --workspaces --include-workspace-root --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --workspaces --include-workspace-root --no-audit --no-fund
 
 # ---------- dev ----------
 FROM base AS dev

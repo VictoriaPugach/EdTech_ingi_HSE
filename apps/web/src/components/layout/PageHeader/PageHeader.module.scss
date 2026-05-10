@@ -1,0 +1,33 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.header {
+  @include flex-between;
+  align-items: flex-start;
+  gap: $space-4;
+  margin-bottom: $space-6;
+}
+
+.text { @include flex-col; gap: $space-2; min-width: 0; }
+
+.title {
+  font-family: $font-family-heading;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-extrabold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: $font-family-base;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: $space-2;
+  flex-shrink: 0;
+}

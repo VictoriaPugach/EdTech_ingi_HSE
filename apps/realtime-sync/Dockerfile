@@ -1,17 +1,23 @@
+# syntax=docker/dockerfile:1
 # =============================================================================
 #  Realtime Sync (BC-1) — Node.js + ws + Yjs
 #  Multi-stage. Контекст сборки — корень монорепо.
 # =============================================================================
 
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 COPY package.json package-lock.json* ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/realtime-sync/package.json apps/realtime-sync/
-RUN npm install --workspaces --include-workspace-root --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --workspaces --include-workspace-root --no-audit --no-fund
 
 FROM base AS dev
 ENV NODE_ENV=development

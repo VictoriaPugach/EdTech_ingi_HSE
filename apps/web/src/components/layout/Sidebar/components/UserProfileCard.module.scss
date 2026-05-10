@@ -1,0 +1,36 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+.card {
+  @include flex-col;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-4;
+  border-radius: $radius-xl;
+  border: 1px solid $color-border-soft;
+  background: $color-surface;
+  text-align: center;
+}
+
+.text {
+  @include flex-col;
+  align-items: center;
+  gap: 2px;
+}
+
+.name {
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.role {
+  font-family: $font-family-base;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.btn {
+  margin-top: $space-1;
+}

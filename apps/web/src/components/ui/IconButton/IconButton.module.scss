@@ -1,0 +1,100 @@
+@use 'sass:color';
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+// Кнопки с иконкой в шапке: «сквирклы» с лёгким лавандовым фоном (макет),
+// не круги — иконка занимает основную площадь с небольшим внутренним отступом.
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  // Сильное скругление углов (не pill / не круг).
+  border-radius: $radius-xl;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: $color-primary;
+  padding: 0;
+  @include transition(all);
+  @include focus-ring;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// --- Sizes -------------------------------------------------------------------
+.s-sm {
+  width: 36px;
+  height: 36px;
+  padding: $space-2;
+
+  .icon > svg,
+  .icon > img {
+    width: 100%;
+    height: 100%;
+    max-width: 22px;
+    max-height: 22px;
+  }
+}
+
+.s-md {
+  width: 44px;
+  height: 44px;
+  padding: $space-2;
+
+  .icon > svg,
+  .icon > img {
+    width: 100%;
+    height: 100%;
+    max-width: 26px;
+    max-height: 26px;
+  }
+}
+
+// --- Variants ----------------------------------------------------------------
+.v-surface {
+  background: $color-primary-subtle;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hovered;
+    border-color: rgba($color-primary-stroke, 0.35);
+  }
+}
+
+.v-soft {
+  background: $color-primary-light;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($color-primary-light, $lightness: -3%);
+  }
+}
+
+.v-ghost {
+  background: transparent;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hovered;
+  }
+}
+
+// --- Icon — центрируется и масштабируется под доступную область --------------
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+
+  > svg,
+  > img {
+    flex-shrink: 0;
+    object-fit: contain;
+    display: block;
+  }
+}

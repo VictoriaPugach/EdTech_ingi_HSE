@@ -1,0 +1,21 @@
+@use '../../../styles/variables' as *;
+
+.track {
+  width: 100%;
+  background: $color-border-soft;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.size-sm { height: 6px; }
+.size-md { height: 10px; }
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 350ms ease;
+}
+
+.tone-primary { background: $color-primary; }
+.tone-success { background: $color-secondary-dark; }
