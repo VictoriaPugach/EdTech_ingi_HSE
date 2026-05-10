@@ -69,7 +69,6 @@
   white-space: nowrap;
   border-width: 0;
 }
-
 // --- Scrollbar hidden (прокрутка сохраняется, полоса не показывается) --------
 @mixin hide-scrollbar {
   scrollbar-width: none;
@@ -81,3 +80,4 @@
     height: 0;
   }
 }
+

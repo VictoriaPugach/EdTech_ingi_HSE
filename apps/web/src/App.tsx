@@ -1,10 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { LoginPage }   from './pages/LoginPage';
-import { HomePage }    from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { HomePage } from './pages/HomePage';
 import { SessionPage } from './pages/SessionPage';
 import { PrivateRoute } from './router/PrivateRoute';
-import { AppLayout }    from './layouts/AppLayout';
-import { useAuth }      from './hooks/useAuth';
+import { AppLayout } from './layouts/AppLayout';
+import { useAuth } from './hooks/useAuth';
 
 export function App() {
   const { isLoading } = useAuth();
