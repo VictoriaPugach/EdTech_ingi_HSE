@@ -13,11 +13,33 @@
 import type { FastifyInstance } from 'fastify';
 import type { HintRequestDto, HintResponseDto } from '@edtech/shared';
 import { config } from '../config.js';
+import {
+  hintRequestBodySchema,
+  hintResponseSchema,
+  hintUpstreamErrorSchema,
+  simpleErrorSchema,
+} from '../openapi/schemas.js';
 
 export async function hintsRoutes(app: FastifyInstance): Promise<void> {
   app.post(
     '/hints',
-    { preHandler: [app.authenticate] },
+    {
+      preHandler: [app.authenticate],
+      schema: {
+        tags: ['Hints'],
+        summary: 'Запрос подсказок по коду',
+        description:
+          'Прокси к Hint Service: JWT обязателен. Тело совпадает с контрактом BC-2 (`HintRequestDto`).',
+        security: [{ bearerAuth: [] }],
+        body: hintRequestBodySchema,
+        response: {
+          200: hintResponseSchema,
+          401: simpleErrorSchema,
+          502: hintUpstreamErrorSchema,
+          503: simpleErrorSchema,
+        },
+      },
+    },
     async (req, reply): Promise<HintResponseDto | undefined> => {
       const body = req.body as HintRequestDto;
 
