@@ -35,15 +35,39 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await app.register(swagger, {
     openapi: {
+      openapi: '3.0.3',
       info: {
         title: 'EdTech Collab — API Gateway',
-        description: 'BC-3 Learning Management. REST API для авторизации, сессий, подсказок.',
+        description:
+          'BC-3 Learning Management. REST API: регистрация/логин (JWT), сессии совместного редактирования, прокси подсказок к Hint Service. Клиент ходит только сюда; `/api/hints` требует заголовок Authorization.',
         version: '0.1.0',
       },
-      servers: [{ url: `http://localhost:${config.GATEWAY_PORT}` }],
+      servers: [{ url: `http://localhost:${config.GATEWAY_PORT}`, description: 'Локальная разработка' }],
+      tags: [
+        { name: 'Health', description: 'Проверки для Docker / Kubernetes' },
+        { name: 'Auth', description: 'Регистрация, логин, текущий пользователь (ФТ-12)' },
+        { name: 'Sessions', description: 'Сессии редактора (ФТ-2, ФТ-13)' },
+        { name: 'Hints', description: 'Педагогические подсказки через Hint Service (BC-2)' },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            description: 'Токен из POST /api/auth/login (поле accessToken).',
+          },
+        },
+      },
     },
   });
-  await app.register(swaggerUi, { routePrefix: '/docs' });
+  await app.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      defaultModelsExpandDepth: 2,
+    },
+  });
 
   await app.register(prismaPlugin);
   await app.register(authPlugin);
