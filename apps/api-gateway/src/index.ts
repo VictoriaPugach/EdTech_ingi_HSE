@@ -16,7 +16,9 @@ process.on('SIGTERM', () => void shutdown('SIGTERM'));
 
 try {
   await app.listen({ port: config.GATEWAY_PORT, host: '0.0.0.0' });
-  app.log.info(`API Gateway started on :${config.GATEWAY_PORT} — Swagger at /docs`);
+  app.log.info(
+    `API Gateway started on :${config.GATEWAY_PORT} — Swagger UI /docs, OpenAPI JSON /docs/json`,
+  );
 } catch (err) {
   app.log.fatal({ err }, 'Failed to start API Gateway');
   process.exit(1);
