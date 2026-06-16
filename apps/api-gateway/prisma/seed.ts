@@ -6,6 +6,7 @@
  *   — или через package.json: npm run db:seed
  *
  * Тестовые аккаунты:
+ *   🛡️  Администратор:  admin@test.com    / Admin123!
  *   👩‍🏫 Преподаватель: teacher@test.com  / Teacher123!
  *   👦  Ученик:         student@test.com  / Student123!
  */
@@ -17,6 +18,12 @@ const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
 
 const testUsers = [
+  {
+    email:    'admin@test.com',
+    password: 'Admin123!',
+    name:     'Мария Администраторова',
+    role:     'ADMIN' as const,
+  },
   {
     email:    'teacher@test.com',
     password: 'Teacher123!',
@@ -34,7 +41,7 @@ const testUsers = [
   email: string;
   password: string;
   name: string;
-  role: 'TEACHER' | 'STUDENT';
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT';
   ageYears?: number;
 }>;
 
@@ -56,12 +63,16 @@ async function main() {
       },
     });
 
-    const roleLabel = u.role === 'TEACHER' ? '👩‍🏫 Преподаватель' : '👦 Ученик';
+    const roleLabel =
+      u.role === 'ADMIN' ? '🛡️ Администратор'
+      : u.role === 'TEACHER' ? '👩‍🏫 Преподаватель'
+      : '👦 Ученик';
     console.log(`  ${roleLabel}  ${user.email}  (id: ${user.id})`);
   }
 
   console.log('\n✅ Seed выполнен успешно.');
   console.log('\n📋 Тестовые учётные данные:');
+  console.log('   🛡️   admin@test.com     /  Admin123!');
   console.log('   👩‍🏫  teacher@test.com  /  Teacher123!');
   console.log('   👦   student@test.com   /  Student123!');
 }
