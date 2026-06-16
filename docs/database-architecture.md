@@ -205,8 +205,36 @@ ad-hoc сессии без курса.
 4. При изменении DTO — синхронизируем `packages/shared/src/index.ts`.
 5. Один коммит = схема + миграция + правка этого документа.
 
-## 6. Открытые вопросы (backlog)
+## 6. Онлайн-занятие: режимы, роли, чат (BC-1 ↔ BC-3)
+
+Экран «Онлайн-занятие» переиспользует существующие `sessions`, `participants`,
+`snapshots`. Видео идёт через SFU (LiveKit) и **таблиц не требует** — медиа P2P-к-SFU,
+сигналинг и состояние камеры/микрофона эфемерны (см. ADR `video-livekit-sfu`).
+Чат — поверх Yjs с зеркалом в БД (ADR `in-session-chat`).
+
+### 6.1. Изменения существующих таблиц
+- `sessions.mode` (enum `SessionMode` GROUP/SINGLE) — режим занятия: совместное
+  редактирование всеми (GROUP) либо один кодит, остальные наблюдают (SINGLE).
+- `participants.role` (enum `SessionRole` HOST/EDITOR/VIEWER) — права на занятии:
+  преподаватель = HOST, ученик-редактор = EDITOR, наблюдатель = VIEWER.
+- `participants.last_seen_at` — presence/таймауты.
+
+### 6.2. `chat_messages` — история чата занятия
+| Поле | Тип | Назначение |
+|---|---|---|
+| `id` | uuid PK | совпадает с id сообщения в `Y.Array('chat')` (идемпотентность зеркала) |
+| `session_id` | uuid FK→sessions (Cascade) | |
+| `user_id` | uuid? FK→users (SetNull) | NULL для системных сообщений |
+| `kind` | enum `ChatMessageKind` | USER / SYSTEM |
+| `body` | text | текст сообщения |
+| `created_at` | timestamptz | |
+
+Индекс: `(session_id, created_at)`. Горячий путь доставки — `Y.Array('chat')` в Y.Doc
+сессии; Realtime Sync зеркалит сюда в хуке `onUpdate`. История — `GET /api/sessions/:id/chat`.
+
+## 7. Открытые вопросы (backlog)
 
 - Версионирование контента уроков (история правок) — пока нет.
-- Платный доступ / когорты / расписание занятий — вне текущей модели.
+- Платный доступ / когорты / расписание занятий (`startsAt` у урока/сессии) — вне текущей модели.
+- Запись онлайн-занятий — вне MVP (видео не пишется в БД).
 - Полнотекстовый поиск по курсам (pg_trgm / tsvector) — при необходимости каталога.

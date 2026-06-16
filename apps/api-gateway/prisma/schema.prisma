@@ -39,6 +39,7 @@ model User {
   achievements    Achievement[]
   authoredCourses Course[]      @relation("CourseAuthor")
   enrollments     Enrollment[]
+  chatMessages    ChatMessage[]
 
   @@map("users")
 }
@@ -52,6 +53,29 @@ enum SessionLanguage {
   JAVASCRIPT
 }
 
+// Режим онлайн-занятия (экраны Online_class):
+//   GROUP  — все ученики редактируют совместно;
+//   SINGLE — кодит один ученик, остальные наблюдают.
+enum SessionMode {
+  GROUP
+  SINGLE
+}
+
+// Роль участника на занятии:
+//   HOST   — преподаватель (управление, комментарии в коде, ФТ-11);
+//   EDITOR — ученик с правом редактирования;
+//   VIEWER — наблюдатель (read-only редактор).
+enum SessionRole {
+  HOST
+  EDITOR
+  VIEWER
+}
+
+enum ChatMessageKind {
+  USER
+  SYSTEM
+}
+
 model Session {
   id         String          @id @default(uuid()) @db.Uuid
   ownerId    String          @map("owner_id") @db.Uuid
@@ -59,6 +83,7 @@ model Session {
   lessonId   String?         @map("lesson_id") @db.Uuid
   title      String
   language   SessionLanguage @default(PYTHON)
+  mode       SessionMode     @default(GROUP)
   inviteCode String          @unique @map("invite_code")
   isActive   Boolean         @default(true) @map("is_active")
   createdAt  DateTime        @default(now()) @map("created_at")
@@ -69,6 +94,7 @@ model Session {
   participants Participant[]
   snapshots    Snapshot[]
   errorEvents  ErrorEvent[]
+  chatMessages ChatMessage[]
 
   @@index([ownerId])
   @@index([inviteCode])
@@ -77,11 +103,13 @@ model Session {
 }
 
 model Participant {
-  id        String    @id @default(uuid()) @db.Uuid
-  sessionId String    @map("session_id") @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  joinedAt  DateTime  @default(now()) @map("joined_at")
-  leftAt    DateTime? @map("left_at")
+  id         String      @id @default(uuid()) @db.Uuid
+  sessionId  String      @map("session_id") @db.Uuid
+  userId     String      @map("user_id") @db.Uuid
+  role       SessionRole @default(EDITOR)
+  joinedAt   DateTime    @default(now()) @map("joined_at")
+  leftAt     DateTime?   @map("left_at")
+  lastSeenAt DateTime?   @map("last_seen_at")
 
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -90,6 +118,24 @@ model Participant {
   @@index([sessionId])
   @@index([userId])
   @@map("participants")
+}
+
+// Сообщения чата онлайн-занятия. Горячий путь — Y.Array('chat') в Y.Doc сессии;
+// сюда Realtime Sync зеркалит сообщения для истории и модерации.
+// См. ADR architecture-decision-records/in-session-chat.
+model ChatMessage {
+  id        String          @id @default(uuid()) @db.Uuid
+  sessionId String          @map("session_id") @db.Uuid
+  userId    String?         @map("user_id") @db.Uuid
+  kind      ChatMessageKind @default(USER)
+  body      String
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, createdAt])
+  @@map("chat_messages")
 }
 
 // ----------------------------------------------------------------------------
