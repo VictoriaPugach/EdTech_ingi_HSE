@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import type { CourseDetailDto } from '@edtech/shared';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
@@ -51,6 +51,7 @@ function toProgram(lessons: CourseDetailDto['modules'][number]['lessons'], offse
 export function CoursePage() {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [course, setCourse] = useState<CourseDetailDto | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -91,7 +92,12 @@ export function CoursePage() {
       content: (
         <div className={styles.stack}>
           {program.map(({ module, lessons }) => (
-            <CourseProgram key={module.id} title={module.title} lessons={lessons} />
+            <CourseProgram
+              key={module.id}
+              title={module.title}
+              lessons={lessons}
+              onOpenLesson={(lessonId) => navigate(`/courses/${course.slug}/lessons/${lessonId}`)}
+            />
           ))}
         </div>
       ),
