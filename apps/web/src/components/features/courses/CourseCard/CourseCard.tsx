@@ -35,9 +35,9 @@ const STATUS_TAG: Record<CourseStatus, { label: string; tone: 'success' | 'neutr
 };
 
 const STATUS_ACTION: Record<CourseStatus, string> = {
-  'in-progress': 'Продолжить',
+  'in-progress': 'Перейти к курсу',
   completed: 'Посмотреть сертификат',
-  archived: 'Открыть',
+  archived: 'Перейти к курсу',
 };
 
 /**
