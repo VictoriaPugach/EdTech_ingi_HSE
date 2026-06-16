@@ -12,16 +12,19 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import type {
+  ContentBlockKind,
   CourseDetailDto,
   CourseLevel,
   CourseStatus,
   CourseSummaryDto,
+  LessonDetailDto,
   LessonType,
 } from '@edtech/shared';
 import {
   courseDetailSchema,
   courseSummarySchema,
   createCourseBodySchema,
+  lessonDetailSchema,
   simpleErrorSchema,
   validationErrorSchema,
 } from '../openapi/schemas.js';
@@ -70,6 +73,7 @@ const up = <T extends string>(v: T) => v.toUpperCase();
 const lvl = (v: string) => v.toLowerCase() as CourseLevel;
 const st = (v: string) => v.toLowerCase() as CourseStatus;
 const ltype = (v: string) => v.toLowerCase() as LessonType;
+const ckind = (v: string) => v.toLowerCase() as ContentBlockKind;
 const lang = (v: string) => v.toLowerCase() as CourseSummaryDto['language'];
 
 function slugify(title: string): string {
@@ -267,6 +271,97 @@ export async function coursesRoutes(app: FastifyInstance): Promise<void> {
 
       const detail = await loadDetail(app, course.id);
       return reply.send(detail);
+    },
+  );
+
+  // ── Детальный урок по id ───────────────────────────────────────────────────
+  app.get(
+    '/lessons/:id',
+    {
+      preHandler: [app.authenticate],
+      schema: {
+        tags: ['Courses'],
+        summary: 'Урок по id',
+        description: 'Наполнение урока (блоки контента), материалы и навигация по программе курса.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: { id: { type: 'string', format: 'uuid' } },
+        },
+        response: {
+          200: lessonDetailSchema,
+          401: simpleErrorSchema,
+          403: simpleErrorSchema,
+          404: simpleErrorSchema,
+        },
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const { id } = req.params as { id: string };
+
+      const lesson = await app.prisma.lesson.findUnique({
+        where: { id },
+        include: {
+          blocks: { orderBy: { order: 'asc' } },
+          materials: { orderBy: { createdAt: 'asc' } },
+          module: {
+            include: {
+              course: { include: { author: { select: { name: true } } } },
+            },
+          },
+        },
+      });
+      if (!lesson) return reply.code(404).send({ error: 'LessonNotFound' });
+
+      const course = lesson.module.course;
+      const isOwner = course.authorId === req.user.sub;
+      if (course.status !== 'PUBLISHED' && !isOwner && req.user.role !== 'admin') {
+        return reply.code(403).send({ error: 'Forbidden: course is not published' });
+      }
+
+      // Соседние уроки в порядке программы (модуль.order, затем урок.order).
+      const modules = await app.prisma.courseModule.findMany({
+        where: { courseId: course.id },
+        orderBy: { order: 'asc' },
+        include: { lessons: { orderBy: { order: 'asc' }, select: { id: true, title: true } } },
+      });
+      const siblings = modules
+        .flatMap((m) => m.lessons)
+        .map((l, i) => ({ id: l.id, title: l.title, order: i }));
+
+      const dto: LessonDetailDto = {
+        id: lesson.id,
+        title: lesson.title,
+        summary: lesson.summary,
+        order: lesson.order,
+        type: ltype(lesson.type),
+        durationMin: lesson.durationMin,
+        course: {
+          id: course.id,
+          slug: course.slug,
+          title: course.title,
+          level: lvl(course.level),
+          language: lang(course.language),
+          teacherName: course.author?.name ?? null,
+        },
+        blocks: lesson.blocks.map((b) => ({
+          id: b.id,
+          order: b.order,
+          kind: ckind(b.kind),
+          data: (b.data ?? {}) as Record<string, unknown>,
+        })),
+        materials: lesson.materials.map((m) => ({
+          id: m.id,
+          title: m.title,
+          format: m.format,
+          sizeBytes: m.sizeBytes,
+          url: m.url,
+        })),
+        siblings,
+      };
+
+      return reply.send(dto);
     },
   );
 }

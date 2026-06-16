@@ -184,3 +184,41 @@ export interface CreateCourseInput {
   estimatedHours?: number;
   modules?: CreateCourseModuleInput[];
 }
+
+export type ContentBlockKind = 'text' | 'code' | 'video' | 'image' | 'quiz' | 'callout';
+
+/** Блок наполнения урока. Форма `data` зависит от `kind` (docs/database-architecture.md §2.5). */
+export interface LessonContentBlockDto {
+  id: string;
+  order: number;
+  kind: ContentBlockKind;
+  data: Record<string, unknown>;
+}
+
+/** Соседний урок курса (для навигации по программе). */
+export interface LessonNavItemDto {
+  id: string;
+  title: string;
+  order: number;
+}
+
+export interface LessonDetailDto {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  type: LessonType;
+  durationMin: number | null;
+  course: {
+    id: string;
+    slug: string;
+    title: string;
+    level: CourseLevel;
+    language: SessionLanguage;
+    teacherName: string | null;
+  };
+  blocks: LessonContentBlockDto[];
+  materials: MaterialDto[];
+  /** Все уроки курса в порядке программы (для боковой навигации). */
+  siblings: LessonNavItemDto[];
+}

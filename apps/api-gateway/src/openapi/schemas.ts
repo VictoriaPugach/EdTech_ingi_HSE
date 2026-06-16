@@ -164,6 +164,72 @@ export const createCourseBodySchema = {
   },
 } as const;
 
+const contentBlockKindEnum = ['text', 'code', 'video', 'image', 'quiz', 'callout'] as const;
+
+export const lessonDetailSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    title: { type: 'string' },
+    summary: { type: 'string', nullable: true },
+    order: { type: 'integer' },
+    type: { type: 'string', enum: [...lessonTypeEnum] },
+    durationMin: { type: 'integer', nullable: true },
+    course: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        slug: { type: 'string' },
+        title: { type: 'string' },
+        level: { type: 'string', enum: [...courseLevelEnum] },
+        language: { type: 'string', enum: ['python', 'javascript'] },
+        teacherName: { type: 'string', nullable: true },
+      },
+      required: ['id', 'slug', 'title', 'level', 'language'],
+    },
+    blocks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          order: { type: 'integer' },
+          kind: { type: 'string', enum: [...contentBlockKindEnum] },
+          data: { type: 'object', additionalProperties: true },
+        },
+        required: ['id', 'order', 'kind', 'data'],
+      },
+    },
+    materials: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          title: { type: 'string' },
+          format: { type: 'string' },
+          sizeBytes: { type: 'integer', nullable: true },
+          url: { type: 'string' },
+        },
+        required: ['id', 'title', 'format', 'url'],
+      },
+    },
+    siblings: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          title: { type: 'string' },
+          order: { type: 'integer' },
+        },
+        required: ['id', 'title', 'order'],
+      },
+    },
+  },
+  required: ['id', 'title', 'order', 'type', 'course', 'blocks', 'materials', 'siblings'],
+} as const;
+
 export const hintRequestBodySchema = {
   type: 'object',
   required: ['code', 'language'],
