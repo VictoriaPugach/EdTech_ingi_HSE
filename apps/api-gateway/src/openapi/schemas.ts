@@ -51,6 +51,119 @@ export const sessionDtoSchema = {
   required: ['id', 'ownerId', 'title', 'language', 'inviteCode', 'isActive', 'createdAt'],
 } as const;
 
+// --- Курсы (BC-3 LMS) --------------------------------------------------------
+
+const courseLevelEnum = ['beginner', 'intermediate', 'advanced'] as const;
+const courseStatusEnum = ['draft', 'published', 'archived'] as const;
+const lessonTypeEnum = ['reading', 'video', 'practice', 'quiz', 'live_coding'] as const;
+
+export const courseSummarySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    slug: { type: 'string' },
+    title: { type: 'string' },
+    summary: { type: 'string', nullable: true },
+    level: { type: 'string', enum: [...courseLevelEnum] },
+    language: { type: 'string', enum: ['python', 'javascript'] },
+    coverUrl: { type: 'string', nullable: true },
+    status: { type: 'string', enum: [...courseStatusEnum] },
+    authorId: { type: 'string', format: 'uuid', nullable: true },
+    estimatedHours: { type: 'integer', nullable: true },
+    lessonsCount: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+  required: ['id', 'slug', 'title', 'level', 'language', 'status', 'lessonsCount', 'createdAt'],
+} as const;
+
+const lessonSummarySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    title: { type: 'string' },
+    summary: { type: 'string', nullable: true },
+    order: { type: 'integer' },
+    type: { type: 'string', enum: [...lessonTypeEnum] },
+    durationMin: { type: 'integer', nullable: true },
+  },
+  required: ['id', 'title', 'order', 'type'],
+} as const;
+
+export const courseDetailSchema = {
+  type: 'object',
+  properties: {
+    ...courseSummarySchema.properties,
+    description: { type: 'string', nullable: true },
+    modules: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          title: { type: 'string' },
+          order: { type: 'integer' },
+          lessons: { type: 'array', items: lessonSummarySchema },
+        },
+        required: ['id', 'title', 'order', 'lessons'],
+      },
+    },
+    materials: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          title: { type: 'string' },
+          format: { type: 'string' },
+          sizeBytes: { type: 'integer', nullable: true },
+          url: { type: 'string' },
+        },
+        required: ['id', 'title', 'format', 'url'],
+      },
+    },
+  },
+  required: [...courseSummarySchema.required, 'modules', 'materials'],
+} as const;
+
+export const createCourseBodySchema = {
+  type: 'object',
+  required: ['title'],
+  properties: {
+    title: { type: 'string', minLength: 1, maxLength: 160 },
+    slug: { type: 'string', minLength: 1, maxLength: 160, pattern: '^[a-z0-9-]+$' },
+    summary: { type: 'string', maxLength: 280 },
+    description: { type: 'string' },
+    level: { type: 'string', enum: [...courseLevelEnum] },
+    language: { type: 'string', enum: ['python', 'javascript'] },
+    coverUrl: { type: 'string' },
+    status: { type: 'string', enum: [...courseStatusEnum] },
+    estimatedHours: { type: 'integer', minimum: 0 },
+    modules: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['title'],
+        properties: {
+          title: { type: 'string', minLength: 1, maxLength: 160 },
+          lessons: {
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['title'],
+              properties: {
+                title: { type: 'string', minLength: 1, maxLength: 160 },
+                summary: { type: 'string', maxLength: 280 },
+                type: { type: 'string', enum: [...lessonTypeEnum] },
+                durationMin: { type: 'integer', minimum: 0 },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
 export const hintRequestBodySchema = {
   type: 'object',
   required: ['code', 'language'],
