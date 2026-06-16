@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import type { LessonDetailDto, LessonType } from '@edtech/shared';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { Button } from '../../components/ui/Button';
+import { Banner } from '../../components/layout/Banner';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { InfoCard } from '../../components/ui/InfoCard';
 import { BookIcon, ClockIcon, CodeIcon, StarIcon, CameraIcon } from '../../components/ui/icons';
 import { LessonContent } from '../../components/features/lesson/LessonContent';
+import { LessonCountdown } from '../../components/features/lesson/LessonCountdown';
 import { MaterialsBlock, type MaterialData } from '../../components/features/course/Materials';
 import { MembersList, type MemberData } from '../../components/features/class/Members';
 import { CourseProgram, type ProgramLesson } from '../../components/features/course/CourseProgram';
 import { useAuth } from '../../hooks/useAuth';
 import { coursesApi } from '../../services/courses/coursesApi';
+import lessonBanner from '../../assets/images/banners/lesson-banner.png';
 import styles from './LessonPage.module.scss';
 
 const LEVEL_LABEL = {
@@ -55,6 +56,9 @@ export function LessonPage() {
   const [lesson, setLesson] = useState<LessonDetailDto | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [activeTab, setActiveTab] = useState('overview');
+  // Время начала занятия (заглушка ~20 мин): расписание занятий — backlog,
+  // см. docs/database-architecture.md §6.
+  const [classStartsAt] = useState(() => new Date(Date.now() + 20 * 60 * 1000));
 
   useEffect(() => {
     if (!token || !lessonId) return;
@@ -102,10 +106,29 @@ export function LessonPage() {
         ← Назад к курсу «{lesson.course.title}»
       </Link>
 
+      <Banner
+        title={lesson.title}
+        backgroundSrc={lessonBanner}
+        description={lesson.summary ?? undefined}
+        meta={
+          <>
+            <span>{TYPE_LABEL[lesson.type]}</span>
+            {lesson.durationMin && <span>· {lesson.durationMin} минут</span>}
+            <span>· Онлайн в LOGO</span>
+          </>
+        }
+      >
+        {lesson.type === 'live_coding' && (
+          <LessonCountdown
+            targetAt={classStartsAt}
+            joinIcon={<CameraIcon width={18} height={18} />}
+            onJoin={() => navigate(`/s/lesson-${lesson.id}`)}
+          />
+        )}
+      </Banner>
+
       <div className={styles.layout}>
         <div className={styles.main}>
-          <PageHeader title={lesson.title} subtitle={lesson.summary ?? undefined} />
-
           <div className={styles.info}>
             <InfoCard icon={<StarIcon />} label="Тип урока" value={TYPE_LABEL[lesson.type]} />
             <InfoCard
@@ -125,15 +148,6 @@ export function LessonPage() {
         </div>
 
         <aside className={styles.sidebar}>
-          {lesson.type === 'live_coding' && (
-            <Button
-              fullWidth
-              leftIcon={<CameraIcon width={18} height={18} />}
-              onClick={() => navigate(`/s/lesson-${lesson.id}`)}
-            >
-              Подключиться к занятию
-            </Button>
-          )}
           {teacher.length > 0 && <MembersList members={teacher} title="Преподаватель" />}
           <CourseProgram
             title="Программа курса"

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { CourseDetailDto } from '@edtech/shared';
-import { PageHeader } from '../../components/layout/PageHeader';
+import { Banner } from '../../components/layout/Banner';
+import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
-import { InfoCard } from '../../components/ui/InfoCard';
-import { BookIcon, ClockIcon, CodeIcon, StarIcon } from '../../components/ui/icons';
+import { PlayIcon } from '../../components/ui/icons';
 import { CourseProgram, type ProgramLesson } from '../../components/features/course/CourseProgram';
 import { MaterialsBlock, type MaterialData } from '../../components/features/course/Materials';
 import { useAuth } from '../../hooks/useAuth';
 import { coursesApi } from '../../services/courses/coursesApi';
+import courseBanner from '../../assets/images/banners/course-banner.png';
 import styles from './CoursePage.module.scss';
 
 const LEVEL_LABEL = {
@@ -85,6 +86,9 @@ export function CoursePage() {
     return { module: m, lessons };
   });
 
+  const firstLessonId = course.modules.flatMap((m) => m.lessons)[0]?.id;
+  const langLabel = course.language === 'python' ? 'Python' : 'JavaScript';
+
   const tabs: TabItem[] = [
     {
       id: 'program',
@@ -111,22 +115,29 @@ export function CoursePage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title={course.title} subtitle={course.summary ?? undefined} />
-
-      <div className={styles.info}>
-        <InfoCard icon={<StarIcon />} label="Уровень" value={LEVEL_LABEL[course.level]} />
-        <InfoCard icon={<BookIcon />} label="Уроков" value={course.lessonsCount} />
-        <InfoCard
-          icon={<ClockIcon />}
-          label="Длительность"
-          value={course.estimatedHours ? `${course.estimatedHours} ч` : '—'}
-        />
-        <InfoCard
-          icon={<CodeIcon />}
-          label="Язык"
-          value={course.language === 'python' ? 'Python' : 'JavaScript'}
-        />
-      </div>
+      <Banner
+        title={course.title}
+        backgroundSrc={courseBanner}
+        description={course.summary ?? undefined}
+        meta={
+          <>
+            <span>{LEVEL_LABEL[course.level]}</span>
+            <span>· {course.lessonsCount} уроков</span>
+            {course.estimatedHours && <span>· {course.estimatedHours} ч</span>}
+            <span>· {langLabel}</span>
+          </>
+        }
+      >
+        {firstLessonId && (
+          <Button
+            variant="success"
+            leftIcon={<PlayIcon width={18} height={18} />}
+            onClick={() => navigate(`/courses/${course.slug}/lessons/${firstLessonId}`)}
+          >
+            Начать обучение
+          </Button>
+        )}
+      </Banner>
 
       <Tabs tabs={tabs} activeId={activeTab} onChange={setActiveTab} />
     </div>
