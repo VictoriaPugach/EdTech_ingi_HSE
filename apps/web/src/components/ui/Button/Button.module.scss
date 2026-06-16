@@ -78,6 +78,24 @@
   }
 }
 
+.success {
+  background: $color-secondary-dark;
+  border-color: $color-secondary-dark;
+  color: $color-text-inverse;
+
+  &:hover:not(:disabled) {
+    background: darken($color-secondary-dark, 6%);
+    border-color: darken($color-secondary-dark, 6%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($color-secondary-dark, 0.35);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
 .danger {
   background: $color-error;
   border-color: $color-error;
