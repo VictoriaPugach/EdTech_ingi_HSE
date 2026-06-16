@@ -38,9 +38,35 @@ export interface SessionDto {
   ownerId: string;
   title: string;
   language: SessionLanguage;
+  mode: SessionMode;
   inviteCode: string;
   createdAt: string;
   isActive: boolean;
+}
+
+/** Режим онлайн-занятия. */
+export type SessionMode = 'group' | 'single';
+
+/** Роль участника на занятии. */
+export type SessionRole = 'host' | 'editor' | 'viewer';
+
+/** Ответ POST /api/sessions/:id/join — токен и роль для подключения к WS/видео. */
+export interface JoinSessionDto {
+  /** Сессионный JWT для WebSocket Realtime Sync (claim sessionRole). */
+  token: string;
+  sessionId: string;
+  role: SessionRole;
+  mode: SessionMode;
+}
+
+export interface ChatMessageDto {
+  id: string;
+  sessionId: string;
+  userId: string | null;
+  authorName: string | null;
+  kind: 'user' | 'system';
+  body: string;
+  createdAt: string;
 }
 
 // ----------------------------------------------------------------------------

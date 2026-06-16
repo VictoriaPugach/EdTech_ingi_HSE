@@ -44,11 +44,23 @@ export const sessionDtoSchema = {
     ownerId: { type: 'string', format: 'uuid' },
     title: { type: 'string' },
     language: { type: 'string', enum: ['python', 'javascript'] },
+    mode: { type: 'string', enum: ['group', 'single'] },
     inviteCode: { type: 'string' },
     isActive: { type: 'boolean' },
     createdAt: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'ownerId', 'title', 'language', 'inviteCode', 'isActive', 'createdAt'],
+  required: ['id', 'ownerId', 'title', 'language', 'mode', 'inviteCode', 'isActive', 'createdAt'],
+} as const;
+
+export const joinSessionSchema = {
+  type: 'object',
+  properties: {
+    token: { type: 'string' },
+    sessionId: { type: 'string', format: 'uuid' },
+    role: { type: 'string', enum: ['host', 'editor', 'viewer'] },
+    mode: { type: 'string', enum: ['group', 'single'] },
+  },
+  required: ['token', 'sessionId', 'role', 'mode'],
 } as const;
 
 // --- Курсы (BC-3 LMS) --------------------------------------------------------
