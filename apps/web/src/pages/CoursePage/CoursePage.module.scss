@@ -8,14 +8,15 @@
   margin: 0 auto;
 }
 
-.toolbar {
-  display: flex;
-  justify-content: flex-end;
+.info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $space-4;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+.stack {
+  display: flex;
+  flex-direction: column;
   gap: $space-5;
 }
 
