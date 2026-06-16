@@ -10,6 +10,7 @@ import { config } from './config.js';
 import { logger } from './logger.js';
 import { connectRedis, disconnectRedis } from './redis.js';
 import { getOrCreateRoom, getActiveRoomCount, destroyAllRooms } from './crdt/room.js';
+import { verifyToken, type ConnectionIdentity } from './auth.js';
 
 const startedAt = Date.now();
 
@@ -46,6 +47,27 @@ function extractSessionId(url: string | undefined): string | null {
   return tail || null;
 }
 
+function extractToken(url: string | undefined): string | null {
+  if (!url) return null;
+  return new URL(url, 'http://placeholder').searchParams.get('token');
+}
+
+/**
+ * Аутентификация WS-подключения (НФТ-5). Возвращает identity участника либо
+ * строку с причиной отказа. В dev (REQUIRE_AUTH=false) подключение без токена
+ * разрешено как анонимный редактор (см. NIR).
+ */
+function authenticate(sessionId: string, token: string | null): ConnectionIdentity | { reject: string } {
+  if (!token) {
+    if (config.REQUIRE_AUTH) return { reject: 'missing token' };
+    return { userId: 'anonymous', role: 'EDITOR' };
+  }
+  const claims = verifyToken(token);
+  if (!claims) return { reject: 'invalid token' };
+  if (claims.sessionId && claims.sessionId !== sessionId) return { reject: 'token/session mismatch' };
+  return { userId: claims.sub, name: claims.name, role: claims.sessionRole ?? 'EDITOR' };
+}
+
 httpServer.on('upgrade', (req: IncomingMessage, socket, head) => {
   const sessionId = extractSessionId(req.url);
   if (!sessionId) {
@@ -54,8 +76,15 @@ httpServer.on('upgrade', (req: IncomingMessage, socket, head) => {
     return;
   }
 
-  // TODO (следующая итерация): JWT-валидация через query param `?token=` (НФТ-5).
-  // Сейчас — открытый доступ для упрощения dev-старта.
+  // JWT-валидация сессионного токена (НФТ-5). Токен выпускает API Gateway
+  // (POST /api/sessions/:id/join) и кладёт роль участника в claims.
+  const auth = authenticate(sessionId, extractToken(req.url));
+  if ('reject' in auth) {
+    logger.warn({ sessionId, reason: auth.reject }, 'WS auth rejected');
+    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+    socket.destroy();
+    return;
+  }
 
   wss.handleUpgrade(req, socket, head, (ws: WebSocket) => {
     const room = getOrCreateRoom(sessionId, {
@@ -65,9 +94,9 @@ httpServer.on('upgrade', (req: IncomingMessage, socket, head) => {
         logger.debug({ sessionId: sid }, 'Y.Doc updated');
       },
     });
-    room.addConnection(ws);
+    room.addConnection(ws, auth);
     logger.info(
-      { sessionId, totalConns: room.conns.size, totalRooms: getActiveRoomCount() },
+      { sessionId, userId: auth.userId, role: auth.role, totalConns: room.conns.size, totalRooms: getActiveRoomCount() },
       'Client connected',
     );
   });

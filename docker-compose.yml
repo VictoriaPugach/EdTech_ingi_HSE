@@ -102,6 +102,9 @@ services:
       REALTIME_WS_PATH: ${REALTIME_WS_PATH:-/ws}
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgresql://${POSTGRES_USER:-edtech}:${POSTGRES_PASSWORD:-edtech_dev_password}@postgres:5432/${POSTGRES_DB:-edtech}?schema=public
+      # Общий с API Gateway секрет для верификации сессионного JWT (НФТ-5).
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-use-32-bytes-of-randomness}
+      REQUIRE_AUTH: ${REALTIME_REQUIRE_AUTH:-false}
     ports:
       - '4001:4001'
     volumes:
