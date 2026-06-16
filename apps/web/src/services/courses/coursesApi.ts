@@ -1,4 +1,9 @@
-import type { CourseDetailDto, CourseSummaryDto, CreateCourseInput } from '@edtech/shared';
+import type {
+  CourseDetailDto,
+  CourseSummaryDto,
+  CreateCourseInput,
+  LessonDetailDto,
+} from '@edtech/shared';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000';
 const COURSES_BASE = `${API_BASE}/api/courses`;
@@ -47,6 +52,14 @@ export const coursesApi = {
       headers: authHeaders(token),
     });
     return handleResponse<CourseDetailDto>(res);
+  },
+
+  /** Детальный урок по id. */
+  async getLesson(token: string, id: string): Promise<LessonDetailDto> {
+    const res = await fetch(`${API_BASE}/api/lessons/${encodeURIComponent(id)}`, {
+      headers: authHeaders(token),
+    });
+    return handleResponse<LessonDetailDto>(res);
   },
 
   /** Создать курс (teacher/admin). */
