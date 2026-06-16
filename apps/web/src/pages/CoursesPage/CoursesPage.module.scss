@@ -1,0 +1,21 @@
+@use '../../styles/variables' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $space-5;
+}
+
+.empty {
+  padding: $space-8 0;
+  text-align: center;
+  color: $color-text-secondary;
+}
