@@ -101,3 +101,86 @@ export interface HealthDto {
   uptimeSec: number;
   checks?: Record<string, 'ok' | 'fail'>;
 }
+
+// ----------------------------------------------------------------------------
+// Учебный контент: курсы / модули / уроки (BC-3 LMS)
+// Доменная модель и причины решений: docs/database-architecture.md
+// ----------------------------------------------------------------------------
+
+export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
+export type CourseStatus = 'draft' | 'published' | 'archived';
+export type LessonType = 'reading' | 'video' | 'practice' | 'quiz' | 'live_coding';
+
+export interface CourseSummaryDto {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  level: CourseLevel;
+  language: SessionLanguage;
+  coverUrl: string | null;
+  status: CourseStatus;
+  authorId: string | null;
+  estimatedHours: number | null;
+  /** Кол-во уроков во всех модулях (для карточки каталога). */
+  lessonsCount: number;
+  createdAt: string;
+}
+
+export interface LessonSummaryDto {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  type: LessonType;
+  durationMin: number | null;
+}
+
+export interface CourseModuleDto {
+  id: string;
+  title: string;
+  order: number;
+  lessons: LessonSummaryDto[];
+}
+
+export interface MaterialDto {
+  id: string;
+  title: string;
+  format: string;
+  sizeBytes: number | null;
+  url: string;
+}
+
+export interface CourseDetailDto extends CourseSummaryDto {
+  description: string | null;
+  modules: CourseModuleDto[];
+  materials: MaterialDto[];
+}
+
+/** Урок в payload создания курса. */
+export interface CreateLessonInput {
+  title: string;
+  summary?: string;
+  type?: LessonType;
+  durationMin?: number;
+}
+
+/** Модуль в payload создания курса. */
+export interface CreateCourseModuleInput {
+  title: string;
+  lessons?: CreateLessonInput[];
+}
+
+/** Тело запроса POST /api/courses (создаёт преподаватель/админ). */
+export interface CreateCourseInput {
+  title: string;
+  slug?: string;
+  summary?: string;
+  description?: string;
+  level?: CourseLevel;
+  language?: SessionLanguage;
+  coverUrl?: string;
+  status?: CourseStatus;
+  estimatedHours?: number;
+  modules?: CreateCourseModuleInput[];
+}
