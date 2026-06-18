@@ -1,0 +1,44 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+  white-space: nowrap;
+}
+
+.icon {
+  display: inline-flex;
+
+  svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
+
+// --- Tones -------------------------------------------------------------------
+.tone-primary {
+  background: $color-primary-light;
+  color: $color-primary;
+}
+
+.tone-success {
+  background: $color-secondary-light;
+  color: $color-secondary-dark;
+}
+
+.tone-neutral {
+  background: $color-border-soft;
+  color: $color-text-secondary;
+}
+
+.tone-warning {
+  background: $color-accent-yellow;
+  color: $color-text-primary;
+}

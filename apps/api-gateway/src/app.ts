@@ -12,7 +12,9 @@ import prismaPlugin from './plugins/prisma.js';
 import authPlugin from './plugins/auth.js';
 import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
+import { usersRoutes } from './routes/users.js';
 import { sessionsRoutes } from './routes/sessions.js';
+import { coursesRoutes } from './routes/courses.js';
 import { hintsRoutes } from './routes/hints.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -46,7 +48,9 @@ export async function buildApp(): Promise<FastifyInstance> {
       tags: [
         { name: 'Health', description: 'Проверки для Docker / Kubernetes' },
         { name: 'Auth', description: 'Регистрация, логин, текущий пользователь (ФТ-12)' },
+        { name: 'Users', description: 'Профиль пользователя: имя, аватар' },
         { name: 'Sessions', description: 'Сессии редактора (ФТ-2, ФТ-13)' },
+        { name: 'Courses', description: 'Курсы, модули, уроки (BC-3 LMS)' },
         { name: 'Hints', description: 'Педагогические подсказки через Hint Service (BC-2)' },
       ],
       components: {
@@ -74,7 +78,9 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await app.register(healthRoutes);
   await app.register(authRoutes, { prefix: '/api' });
+  await app.register(usersRoutes, { prefix: '/api' });
   await app.register(sessionsRoutes, { prefix: '/api' });
+  await app.register(coursesRoutes, { prefix: '/api' });
   await app.register(hintsRoutes, { prefix: '/api' });
 
   return app;

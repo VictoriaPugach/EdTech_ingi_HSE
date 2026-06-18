@@ -1,0 +1,65 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins'    as *;
+
+.banner {
+  position: relative;
+  padding: $space-6 $space-8;
+  border-radius: $radius-2xl;
+  background-color: $color-primary-light;
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: cover;
+  overflow: hidden;
+
+  // Слева — белёсая подложка, чтобы текст читался поверх иллюстрации.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.7) 38%,
+      rgba(255, 255, 255, 0) 62%
+    );
+  }
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  max-width: 60%;
+
+  @include max-md {
+    max-width: 100%;
+  }
+}
+
+.title {
+  font-family: $font-family-heading;
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-extrabold;
+  line-height: $line-height-tight;
+  color: $color-text-primary;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-2 $space-4;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.description {
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $color-text-secondary;
+}
+
+.extra {
+  margin-top: $space-2;
+}

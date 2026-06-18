@@ -1,0 +1,25 @@
+# Caddy автоматически выпускает и продлевает Let's Encrypt сертификат для DOMAIN.
+# DOMAIN и ACME_EMAIL берутся из окружения (см. docker-compose.prod.yml).
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	# REST API → шлюз
+	handle /api/* {
+		reverse_proxy api-gateway:4000
+	}
+
+	# WebSocket совместного редактирования (CRDT). reverse_proxy сам апгрейдит соединение.
+	handle /ws* {
+		reverse_proxy realtime-sync:4001
+	}
+
+	# Всё остальное → SPA (nginx с fallback на index.html для клиентских маршрутов).
+	handle {
+		reverse_proxy web:80
+	}
+}

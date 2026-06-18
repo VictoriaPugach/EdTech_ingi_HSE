@@ -15,6 +15,11 @@ const schema = z.object({
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 chars'),
   JWT_ACCESS_TTL: z.string().default('24h'),
   HINT_SERVICE_URL: z.string().url().default('http://hint-service:4002'),
+  // Видеосвязь: SFU LiveKit (ADR video-livekit-sfu). URL — клиентский (браузер),
+  // ключ/секрет — для подписи access-токенов комнаты. Дефолты только для dev.
+  LIVEKIT_URL: z.string().default('ws://localhost:7880'),
+  LIVEKIT_API_KEY: z.string().default('devkey'),
+  LIVEKIT_API_SECRET: z.string().min(16).default('devsecret_change_me_min_32_chars_long'),
 });
 
 const parsed = schema.safeParse(process.env);

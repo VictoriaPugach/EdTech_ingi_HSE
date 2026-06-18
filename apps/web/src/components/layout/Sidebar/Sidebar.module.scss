@@ -33,12 +33,32 @@
 
 // --- Logo --------------------------------------------------------------------
 .logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
   padding: $space-1 $space-2 $space-3;
 }
 
 .logoImg {
   height: 36px;
   width: auto;
+}
+
+.collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-md;
+  border: none;
+  background: transparent;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover { background: $color-primary-light; color: $color-primary; }
 }
 
 // --- Nav ---------------------------------------------------------------------

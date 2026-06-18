@@ -24,6 +24,28 @@
   }
 }
 
+// Кнопка «показать меню» (когда сайдбар свёрнут).
+.reopen {
+  position: absolute;
+  top: $space-4;
+  left: $space-4;
+  z-index: $z-sticky;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-md;
+  border: 1px solid $color-border-soft;
+  background: $color-surface;
+  color: $color-text-secondary;
+  cursor: pointer;
+  box-shadow: $shadow-sm;
+  transition: background $transition-fast;
+
+  &:hover { background: $color-surface-hover; }
+}
+
 // Полноэкранный режим (для редактора кода).
 .fullHeight {
   height: 100vh;

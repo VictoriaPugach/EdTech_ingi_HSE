@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import styles from './Button.module.scss';
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

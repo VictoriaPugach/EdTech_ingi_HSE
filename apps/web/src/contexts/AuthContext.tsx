@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { authApi, AuthApiError } from '../services/auth/authApi';
+import { usersApi, type UpdateProfilePatch } from '../services/users/usersApi';
 import type { AuthState, LoginCredentials, RegisterCredentials, User } from '../types/auth';
 
 // Storage keys
@@ -17,6 +18,8 @@ export interface AuthContextValue extends AuthState {
   login:    (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout:   () => void;
+  /** Сохраняет профиль (имя/аватар) на сервере и обновляет локальную сессию. */
+  updateProfile: (patch: UpdateProfilePatch) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -24,6 +27,12 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 function persistSession(token: string, user: User, remember: boolean): void {
   const storage = remember ? localStorage : sessionStorage;
   storage.setItem(TOKEN_KEY, token);
+  storage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+/** Перезаписывает только профиль в том хранилище, где лежит активная сессия. */
+function persistUser(user: User): void {
+  const storage = localStorage.getItem(TOKEN_KEY) ? localStorage : sessionStorage;
   storage.setItem(USER_KEY, JSON.stringify(user));
 }
 
@@ -99,9 +108,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
   }, []);
 
+  const updateProfile = useCallback(
+    async (patch: UpdateProfilePatch) => {
+      if (!state.token) return;
+      const updated = await usersApi.updateMe(state.token, patch);
+      persistUser(updated);
+      setState((s) => ({ ...s, user: updated }));
+    },
+    [state.token],
+  );
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, logout }),
-    [state, login, register, logout],
+    () => ({ ...state, login, register, logout, updateProfile }),
+    [state, login, register, logout, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

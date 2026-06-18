@@ -1,0 +1,142 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $color-surface;
+}
+
+.header {
+  flex-shrink: 0;
+  padding: $space-3 $space-4;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  border-bottom: 1px solid $color-border-soft;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-4;
+}
+
+.empty {
+  margin: auto;
+  text-align: center;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 85%;
+}
+
+.own {
+  align-self: flex-end;
+  align-items: flex-end;
+
+  .bubble {
+    background: $color-primary;
+    color: $color-text-inverse;
+    border-radius: $radius-lg $radius-lg $radius-sm $radius-lg;
+  }
+}
+
+.author {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  padding: 0 $space-1;
+}
+
+.bubble {
+  padding: $space-2 $space-3;
+  background: $color-primary-light;
+  color: $color-text-primary;
+  border-radius: $radius-lg $radius-lg $radius-lg $radius-sm;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.time {
+  font-size: 10px;
+  color: $color-text-muted;
+  padding: 0 $space-1;
+}
+
+.system {
+  align-self: center;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  background: $color-bg;
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+}
+
+.composer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3;
+  border-top: 1px solid $color-border-soft;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: $space-2 $space-3;
+  border: 1px solid $color-border;
+  border-radius: $radius-full;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  @include transition(border-color);
+  @include focus-ring;
+
+  &:focus {
+    border-color: $color-border-focus;
+  }
+
+  &:disabled {
+    background: $color-bg;
+    cursor: not-allowed;
+  }
+}
+
+.send {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: $radius-full;
+  background: $color-primary;
+  color: $color-text-inverse;
+  font-size: $font-size-base;
+  cursor: pointer;
+  @include flex-center;
+  @include transition(background);
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+  }
+
+  &:disabled {
+    background: $color-border;
+    cursor: not-allowed;
+  }
+}
