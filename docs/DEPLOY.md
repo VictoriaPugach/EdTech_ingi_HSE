@@ -186,6 +186,87 @@ docker compose -f deploy/docker-compose.prod.yml down -v
 
 ---
 
+## 11. Автодеплой по push в `main` (CI/CD)
+
+Чтобы не заходить на сервер руками, настроен пайплайн в `.github/workflows/ci.yml`:
+на каждый push в `main` GitHub Actions прогоняет линт/типы/тесты, **собирает Docker-образы
+и пушит их в ghcr.io**, после чего заходит на VPS по SSH, тянет свежие образы и
+перезапускает стек **без сборки на сервере** (`pull` → `up -d --no-build` → миграции).
+
+Так слабый VPS не тратит ресурсы на сборку тяжёлого web-бандла — этим занимается CI.
+
+### 11.1. Разовая подготовка сервера
+
+```bash
+ssh root@<IP-сервера>
+git clone <URL-репозитория> ~/edtech     # путь по умолчанию, который ждёт пайплайн
+cd ~/edtech
+cp deploy/.env.prod.example deploy/.env.prod
+nano deploy/.env.prod                     # заполнить как в шаге 5
+```
+
+`deploy/.env.prod` остаётся **только на сервере** (он в `.gitignore`). `git pull` в
+пайплайне обновляет лишь конфиги стека (compose/Caddyfile), секреты не трогает.
+
+Первый запуск сделайте вручную (чтобы Caddy выпустил сертификат и поднялась БД):
+
+```bash
+docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod up -d --build
+docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod \
+  run --rm api-gateway npx prisma migrate deploy
+```
+
+Дальше обновления будут прилетать автоматически по push в `main`.
+
+### 11.2. SSH-ключ для деплоя
+
+На своей машине сгенерируйте отдельный ключ для CI и положите публичную часть на сервер:
+
+```bash
+ssh-keygen -t ed25519 -C "github-deploy" -f deploy_key   # без пароля
+ssh-copy-id -i deploy_key.pub root@<IP-сервера>          # или вручную в ~/.ssh/authorized_keys
+```
+
+Приватный ключ (`deploy_key`) целиком пойдёт в секрет `DEPLOY_SSH_KEY`.
+
+### 11.3. Настройки в GitHub (репозиторий → Settings)
+
+**Secrets** (Settings → Secrets and variables → Actions → *Secrets*):
+
+| Секрет | Значение |
+|--------|----------|
+| `DEPLOY_SSH_HOST` | публичный IP VPS |
+| `DEPLOY_SSH_USER` | пользователь SSH (например `root`) |
+| `DEPLOY_SSH_KEY` | **приватный** ключ `deploy_key` целиком |
+| `DEPLOY_SSH_PORT` | порт SSH, если не 22 (иначе можно не заводить) |
+
+**Variables** (та же страница → *Variables*) — публичные адреса для сборки web-бандла:
+
+| Переменная | Значение |
+|------------|----------|
+| `PUBLIC_URL` | `https://edtech.example.ru` |
+| `PUBLIC_WS_URL` | `wss://edtech.example.ru/ws` |
+
+> `GITHUB_TOKEN` заводить не нужно — он выдаётся пайплайну автоматически и
+> используется и для пуша образов в ghcr.io, и для `docker login` на сервере.
+
+### 11.4. Как это работает
+
+1. Push в `main` → job'ы `typescript` и `python` проверяют код.
+2. `docker-build` собирает 4 образа и пушит в `ghcr.io/<owner>/<repo>/<service>`
+   с тегами `:<git-sha>` и `:latest`.
+3. `deploy` заходит по SSH, делает `git pull` (конфиги), `docker login ghcr.io`,
+   `docker compose pull` (тянет образы с тегом текущего sha) и
+   `up -d --no-build`, затем `prisma migrate deploy`.
+
+Откат: задеплоить старый коммит можно через **Actions → нужный запуск → Re-run jobs**,
+либо вручную на сервере `IMAGE_TAG=<старый-sha> docker compose ... up -d --no-build`.
+
+> Образы в ghcr.io по умолчанию приватные — сервер тянет их по `GITHUB_TOKEN`.
+> Менять видимость на public не требуется.
+
+---
+
 ## Типичные проблемы
 
 | Симптом | Причина / решение |
