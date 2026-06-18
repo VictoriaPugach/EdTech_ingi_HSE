@@ -19,6 +19,15 @@ export interface UserDto {
   name: string;
   role: UserRole;
   createdAt: string;
+  /** Аватар (data URL) или null, если не задан. */
+  avatarUrl?: string | null;
+}
+
+/** Тело запроса PUT /api/users/me — частичное обновление профиля. */
+export interface UpdateProfileInput {
+  name?: string;
+  /** null — убрать аватар. */
+  avatarUrl?: string | null;
 }
 
 export interface AuthTokensDto {
