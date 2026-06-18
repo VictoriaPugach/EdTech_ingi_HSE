@@ -54,4 +54,6 @@ COPY --from=build /app/apps/api-gateway/package.json ./apps/api-gateway/
 COPY --from=build /app/packages/shared ./packages/shared
 WORKDIR /app/apps/api-gateway
 EXPOSE 4000
-CMD ["node", "dist/index.js"]
+# tsc раскладывает вывод глубже из-за импорта типов из packages/shared
+# (общий rootDir = корень монорепо), поэтому entry — не dist/index.js.
+CMD ["node", "dist/apps/api-gateway/src/index.js"]
