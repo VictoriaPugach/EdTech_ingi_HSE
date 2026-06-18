@@ -4,6 +4,7 @@ import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../hooks/useAuth';
+import type { UpdateProfilePatch } from '../../services/users/usersApi';
 import styles from './ProfilePage.module.scss';
 
 const MAX_AVATAR_PX = 256;
@@ -15,7 +16,7 @@ const ROLE_LABEL: Record<string, string> = {
 
 /**
  * Уменьшает выбранное изображение до квадрата ≤ MAX_AVATAR_PX и отдаёт data URL.
- * Так аватар компактно помещается в localStorage и не упирается в квоту.
+ * Так аватар компактно помещается в БД/localStorage и не упирается в лимиты.
  */
 function fileToAvatarDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -47,14 +48,16 @@ export function ProfilePage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(user?.name ?? '');
-  const [avatar, setAvatar] = useState<string | undefined>(user?.avatarUrl);
+  const [avatar, setAvatar] = useState<string | null>(user?.avatarUrl ?? null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   if (!user) return null;
 
+  const currentAvatar = user.avatarUrl ?? null;
   const trimmed = name.trim();
-  const dirty = trimmed !== user.name || avatar !== user.avatarUrl;
+  const dirty = trimmed !== user.name || avatar !== currentAvatar;
 
   const handlePhoto = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,19 +76,31 @@ export function ProfilePage() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!trimmed) {
       setError('Имя не может быть пустым');
       return;
     }
-    updateProfile({ name: trimmed, avatarUrl: avatar });
+    const patch: UpdateProfilePatch = {};
+    if (trimmed !== user.name) patch.name = trimmed;
+    if (avatar !== currentAvatar) patch.avatarUrl = avatar;
+    if (Object.keys(patch).length === 0) return;
+
+    setSaving(true);
     setError('');
-    setSaved(true);
+    try {
+      await updateProfile(patch);
+      setSaved(true);
+    } catch {
+      setError('Не удалось сохранить изменения. Попробуйте ещё раз.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleReset = () => {
     setName(user.name);
-    setAvatar(user.avatarUrl);
+    setAvatar(currentAvatar);
     setError('');
     setSaved(false);
   };
@@ -96,7 +111,7 @@ export function ProfilePage() {
 
       <section className={styles.card}>
         <div className={styles.avatarBlock}>
-          <Avatar src={avatar} name={trimmed || user.name} size="lg" />
+          <Avatar src={avatar ?? undefined} name={trimmed || user.name} size="lg" />
           <div className={styles.avatarActions}>
             <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
               {avatar ? 'Сменить фото' : 'Загрузить фото'}
@@ -106,20 +121,14 @@ export function ProfilePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setAvatar(undefined);
+                  setAvatar(null);
                   setSaved(false);
                 }}
               >
                 Удалить фото
               </Button>
             )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handlePhoto}
-            />
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePhoto} />
           </div>
         </div>
 
@@ -150,10 +159,10 @@ export function ProfilePage() {
         )}
 
         <div className={styles.actions}>
-          <Button variant="primary" onClick={handleSave} disabled={!dirty}>
+          <Button variant="primary" onClick={handleSave} loading={saving} disabled={!dirty}>
             Сохранить
           </Button>
-          <Button variant="ghost" onClick={handleReset} disabled={!dirty}>
+          <Button variant="ghost" onClick={handleReset} disabled={!dirty || saving}>
             Отменить
           </Button>
         </div>

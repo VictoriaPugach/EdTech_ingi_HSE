@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { authApi, AuthApiError } from '../services/auth/authApi';
+import { usersApi, type UpdateProfilePatch } from '../services/users/usersApi';
 import type { AuthState, LoginCredentials, RegisterCredentials, User } from '../types/auth';
 
 // Storage keys
@@ -17,8 +18,8 @@ export interface AuthContextValue extends AuthState {
   login:    (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout:   () => void;
-  /** Обновляет профиль локально (имя/аватар) и сохраняет в активном хранилище. */
-  updateProfile: (patch: Partial<Pick<User, 'name' | 'avatarUrl'>>) => void;
+  /** Сохраняет профиль (имя/аватар) на сервере и обновляет локальную сессию. */
+  updateProfile: (patch: UpdateProfilePatch) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -107,14 +108,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
   }, []);
 
-  const updateProfile = useCallback((patch: Partial<Pick<User, 'name' | 'avatarUrl'>>) => {
-    setState((s) => {
-      if (!s.user) return s;
-      const updated = { ...s.user, ...patch };
+  const updateProfile = useCallback(
+    async (patch: UpdateProfilePatch) => {
+      if (!state.token) return;
+      const updated = await usersApi.updateMe(state.token, patch);
       persistUser(updated);
-      return { ...s, user: updated };
-    });
-  }, []);
+      setState((s) => ({ ...s, user: updated }));
+    },
+    [state.token],
+  );
 
   const value = useMemo<AuthContextValue>(
     () => ({ ...state, login, register, logout, updateProfile }),
