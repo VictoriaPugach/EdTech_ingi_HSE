@@ -69,6 +69,21 @@ export interface ChatMessageDto {
   createdAt: string;
 }
 
+/**
+ * Ответ POST /api/sessions/:id/livekit-token — доступ к видеокомнате SFU LiveKit
+ * (ADR video-livekit-sfu). Токен короткоживущий, выпускается по роли участника.
+ */
+export interface LivekitTokenDto {
+  /** Access-токен LiveKit (JWT, подписан ключом медиасервера). */
+  token: string;
+  /** URL медиасервера для клиента (ws/wss). */
+  url: string;
+  /** Имя комнаты LiveKit (= id сессии). */
+  room: string;
+  /** Может ли участник публиковать камеру/микрофон (VIEWER — только смотрит). */
+  canPublish: boolean;
+}
+
 // ----------------------------------------------------------------------------
 // Подсказки (BC-2 Hint Service)
 // ----------------------------------------------------------------------------

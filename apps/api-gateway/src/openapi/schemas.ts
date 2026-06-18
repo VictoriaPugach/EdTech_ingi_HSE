@@ -63,6 +63,47 @@ export const joinSessionSchema = {
   required: ['token', 'sessionId', 'role', 'mode'],
 } as const;
 
+// --- Чат онлайн-занятия (ADR in-session-chat) --------------------------------
+// Живая доставка — Y.Array('chat') в Y.Doc сессии; здесь — постоянная история.
+
+export const chatMessageSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    sessionId: { type: 'string', format: 'uuid' },
+    userId: { type: 'string', format: 'uuid', nullable: true },
+    authorName: { type: 'string', nullable: true },
+    kind: { type: 'string', enum: ['user', 'system'] },
+    body: { type: 'string' },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+  required: ['id', 'sessionId', 'userId', 'authorName', 'kind', 'body', 'createdAt'],
+} as const;
+
+export const postChatBodySchema = {
+  type: 'object',
+  required: ['body'],
+  properties: {
+    // id генерирует клиент (тот же, что кладётся в Y.Array) — для идемпотентного
+    // зеркалирования без дублей при репликации между нодами (ADR in-session-chat).
+    id: { type: 'string', format: 'uuid' },
+    body: { type: 'string', minLength: 1, maxLength: 2000 },
+  },
+} as const;
+
+// --- Видеокомната LiveKit (ADR video-livekit-sfu) ----------------------------
+
+export const livekitTokenSchema = {
+  type: 'object',
+  properties: {
+    token: { type: 'string' },
+    url: { type: 'string' },
+    room: { type: 'string', format: 'uuid' },
+    canPublish: { type: 'boolean' },
+  },
+  required: ['token', 'url', 'room', 'canPublish'],
+} as const;
+
 // --- Курсы (BC-3 LMS) --------------------------------------------------------
 
 const courseLevelEnum = ['beginner', 'intermediate', 'advanced'] as const;
