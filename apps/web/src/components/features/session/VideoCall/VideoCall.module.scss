@@ -1,8 +1,11 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
 .room {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #14141c;
+  gap: $space-3;
 }
 
 .grid {
@@ -13,4 +16,58 @@
 
 .gridLayout {
   height: 100%;
+}
+
+// Нижняя панель: Микрофон / Камера / Выйти (Figma «Frame 100»).
+.controls {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $space-3;
+}
+
+.ctrl,
+.leave {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  border-radius: $radius-md;
+  background: $color-surface;
+  border: 1.5px solid $color-border-soft;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  @include transition;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Включено — зелёный акцент, выключено — серый.
+.ctrlOn {
+  border-color: $color-secondary;
+  color: $color-secondary-dark;
+}
+
+.ctrlOff {
+  color: $color-text-muted;
+
+  &:hover {
+    border-color: $color-secondary;
+    color: $color-secondary-dark;
+  }
+}
+
+.leave {
+  color: $color-error;
+  border-color: $color-error-light;
+
+  &:hover {
+    background: $color-error-light;
+  }
 }

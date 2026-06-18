@@ -3,14 +3,16 @@ import { useParams } from 'react-router-dom';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { EditorState } from '@codemirror/state';
-import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
+import { EditorView, keymap, lineNumbers } from '@codemirror/view';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
+import { oneDark } from '@codemirror/theme-one-dark';
 import { yCollab } from 'y-codemirror.next';
 import type { SessionRole } from '@edtech/shared';
 import { useAuth } from '../../hooks/useAuth';
 import { sessionsApi } from '../../services/sessions';
 import { Chat, type ChatItem } from '../../components/features/session/Chat';
+import styles from './SessionPage.module.scss';
 
 // Видео грузим лениво: тяжёлый LiveKit-бандл не попадает в основной чанк и
 // подтягивается только когда участник реально включает видеозвонок.
@@ -35,8 +37,22 @@ function colorFromId(id: string): string {
 const ROLE_LABEL: Record<SessionRole, string> = {
   host: 'Ведущий',
   editor: 'Редактор',
-  viewer: 'Наблюдатель (только чтение)',
+  viewer: 'Наблюдатель',
 };
+
+/** Тёмный редактор на всю высоту консоли. */
+const editorHeightTheme = EditorView.theme({
+  '&': { height: '100%' },
+  '.cm-scroller': { overflow: 'auto' },
+});
+
+function formatElapsed(totalSec: number): string {
+  const s = Math.max(0, Math.floor(totalSec));
+  const hh = String(Math.floor(s / 3600)).padStart(2, '0');
+  const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
 
 interface RemoteUser {
   clientId: number;
@@ -58,12 +74,20 @@ export function SessionPage() {
   const [role, setRole] = useState<SessionRole>('editor');
   const [anonymous, setAnonymous] = useState(false);
   const [messages, setMessages] = useState<ChatItem[]>([]);
+  const [elapsed, setElapsed] = useState(0);
 
   // Видеозвонок (LiveKit). Подключаем лениво по кнопке — чтобы не нагружать
   // SFU и канал, пока видео реально не нужно.
   const [videoTok, setVideoTok] = useState<{ url: string; token: string; canPublish: boolean } | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState<string | null>(null);
+
+  // Таймер занятия (с момента входа).
+  useEffect(() => {
+    const startedAt = Date.now();
+    const id = setInterval(() => setElapsed((Date.now() - startedAt) / 1000), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // Слить новые сообщения в map (дедуп по id) и пересобрать отсортированный список.
   const mergeMessages = useCallback((items: ChatItem[]) => {
@@ -158,7 +182,7 @@ export function SessionPage() {
           /* история недоступна (dev/anon) — не критично, живой чат работает */
         });
 
-      // 6. Редактор кода. Для наблюдателя — режим «только чтение».
+      // 6. Редактор кода (тёмная консоль). Для наблюдателя — «только чтение».
       const yText = ydoc.getText('codemirror');
       const onSync = (isSynced: boolean) => {
         if (!isSynced) return;
@@ -184,11 +208,12 @@ export function SessionPage() {
         doc: yText.toString(),
         extensions: [
           lineNumbers(),
-          highlightActiveLine(),
           python(),
           keymap.of([...defaultKeymap, indentWithTab]),
           yCollab(yText, provider.awareness, { undoManager }),
           EditorView.lineWrapping,
+          oneDark,
+          editorHeightTheme,
           ...(editable ? [] : [EditorState.readOnly.of(true), EditorView.editable.of(false)]),
         ],
       });
@@ -231,13 +256,9 @@ export function SessionPage() {
     [user, token, sessionId],
   );
 
-  // Подключить/завершить видеозвонок: токен LiveKit берём лениво при первом включении.
-  const toggleVideo = useCallback(async () => {
+  // Подключить видеозвонок: токен LiveKit берём лениво при первом включении.
+  const connectVideo = useCallback(async () => {
     setVideoError(null);
-    if (videoTok) {
-      setVideoTok(null);
-      return;
-    }
     if (!token || !sessionId) return;
     setVideoLoading(true);
     try {
@@ -248,56 +269,47 @@ export function SessionPage() {
     } finally {
       setVideoLoading(false);
     }
-  }, [videoTok, token, sessionId]);
+  }, [token, sessionId]);
+
+  const statusMeta = {
+    connecting: { cls: styles.dotWait, label: 'Подключение…' },
+    connected: { cls: styles.dotOk, label: 'На связи' },
+    disconnected: { cls: styles.dotOff, label: 'Нет связи' },
+  }[status];
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      <div className="flex items-center justify-between border-b bg-brand-100/50 px-4 py-2">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-slate-700">Сессия:</span>
-          <code className="rounded bg-white px-2 py-1 font-mono text-sm text-brand-700">
-            {sessionId}
-          </code>
-          <button
-            onClick={() => navigator.clipboard.writeText(window.location.href)}
-            className="rounded bg-brand-200 px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-400 hover:text-white"
-          >
-            Скопировать ссылку
-          </button>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-            {ROLE_LABEL[role]}
+    <div className={styles.page}>
+      {/* ── Шапка ──────────────────────────────────────────────────────── */}
+      <header className={styles.header}>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>Онлайн урок</h1>
+          <span className={styles.timer}>
+            <span aria-hidden>●</span> {formatElapsed(elapsed)}
           </span>
-          <button
-            onClick={toggleVideo}
-            disabled={videoLoading}
-            className={`rounded px-2 py-1 text-xs font-semibold text-white disabled:opacity-60 ${
-              videoTok ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-700 hover:opacity-90'
-            }`}
-          >
-            {videoTok ? 'Завершить видео' : videoLoading ? 'Подключение…' : '📹 Видеозвонок'}
+        </div>
+        <div className={styles.headerActions}>
+          <span className={styles.role}>{ROLE_LABEL[role]}</span>
+          <button className={styles.copyBtn} onClick={() => navigator.clipboard.writeText(window.location.href)}>
+            🔗 Скопировать ссылку
           </button>
+          <span className={styles.status}>
+            <span className={`${styles.dot} ${statusMeta.cls}`} /> {statusMeta.label}
+          </span>
         </div>
-
-        <div className="flex items-center gap-3">
-          <ConnectionBadge status={status} />
-          <UsersBadge users={users} me={user ? { name: user.name, color: colorFromId(user.id) } : null} />
-        </div>
-      </div>
+      </header>
 
       {anonymous && (
-        <div className="bg-yellow-50 px-4 py-1 text-xs text-yellow-800">
-          Демо-режим: сессия не найдена в БД, подключение без авторизации. Создайте сессию через API,
-          чтобы получить роли и постоянную историю чата.
+        <div className={styles.banner}>
+          Демо-режим: сессия не найдена в БД, подключение без авторизации. Создайте занятие через
+          преподавателя, чтобы получить роли и постоянную историю.
         </div>
       )}
+      {videoError && <div className={styles.bannerError}>{videoError}</div>}
 
-      {videoError && (
-        <div className="bg-red-50 px-4 py-1 text-xs text-red-700">{videoError}</div>
-      )}
-
-      {videoTok && (
-        <div className="h-56 shrink-0 border-b bg-[#14141c]">
-          <Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-slate-300">Загрузка видео…</div>}>
+      {/* ── Видео (верхний ряд) ────────────────────────────────────────── */}
+      <div className={styles.videoCard}>
+        {videoTok ? (
+          <Suspense fallback={<div className={styles.videoPlaceholder}>Загрузка видео…</div>}>
             <VideoCall
               url={videoTok.url}
               token={videoTok.token}
@@ -305,12 +317,39 @@ export function SessionPage() {
               onLeave={() => setVideoTok(null)}
             />
           </Suspense>
-        </div>
-      )}
+        ) : (
+          <div className={styles.videoPlaceholder}>
+            <span className={styles.placeholderText}>Видеосвязь занятия</span>
+            <button className={styles.connectBtn} onClick={connectVideo} disabled={videoLoading}>
+              📹 {videoLoading ? 'Подключение…' : 'Подключиться к видео'}
+            </button>
+          </div>
+        )}
+      </div>
 
-      <div className="flex min-h-0 flex-1">
-        <div ref={editorHostRef} className="min-w-0 flex-1 overflow-auto" />
-        <aside className="w-80 shrink-0 border-l">
+      {/* ── Рабочий ряд: консоль кода + чат ────────────────────────────── */}
+      <div className={styles.workRow}>
+        <section className={styles.console}>
+          <div className={styles.consoleHeader}>
+            <span className={styles.macDots}>
+              <span className={`${styles.macDot} ${styles.macRed}`} />
+              <span className={`${styles.macDot} ${styles.macYellow}`} />
+              <span className={`${styles.macDot} ${styles.macGreen}`} />
+            </span>
+            <span className={styles.fileName}>main.py</span>
+            <span className={styles.peers}>
+              {users.slice(0, 5).map((u) => (
+                <span key={u.clientId} className={styles.peer} style={{ color: u.color }} title={u.name}>
+                  <span className={styles.peerDot} style={{ backgroundColor: u.color }} />
+                  {u.name}
+                </span>
+              ))}
+            </span>
+          </div>
+          <div ref={editorHostRef} className={styles.editorHost} />
+        </section>
+
+        <aside className={styles.chatCard}>
           <Chat
             messages={messages}
             currentUserId={user?.id ?? ''}
@@ -319,45 +358,6 @@ export function SessionPage() {
           />
         </aside>
       </div>
-
-      <footer className="border-t bg-slate-50 px-4 py-2 text-xs text-slate-500">
-        CRDT через Yjs · WebSocket к <code className="font-mono">{WS_URL}</code> · Чат — Y.Array в том же Y.Doc
-      </footer>
-    </div>
-  );
-}
-
-function ConnectionBadge({ status }: { status: 'connecting' | 'connected' | 'disconnected' }) {
-  const map = {
-    connecting: { label: 'Подключаюсь…', cls: 'bg-yellow-100 text-yellow-700' },
-    connected:  { label: 'На связи',     cls: 'bg-green-100 text-green-700'  },
-    disconnected: { label: 'Отключено',  cls: 'bg-red-100 text-red-700'      },
-  } as const;
-  const { label, cls } = map[status];
-  return <span className={`rounded-full px-3 py-1 text-xs font-semibold ${cls}`}>{label}</span>;
-}
-
-function UsersBadge({ users, me }: { users: RemoteUser[]; me: { name: string; color: string } | null }) {
-  if (users.length === 0)
-    return (
-      <span className="text-xs text-slate-500">
-        Ты:&nbsp;<b style={{ color: me?.color }}>{me?.name ?? '—'}</b>
-      </span>
-    );
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-slate-500">В сессии:</span>
-      {users.slice(0, 6).map((u) => (
-        <span
-          key={u.clientId}
-          className="rounded-full px-2 py-0.5 text-xs font-semibold"
-          style={{ backgroundColor: u.color + '33', color: u.color }}
-          title={u.name}
-        >
-          {u.name}
-        </span>
-      ))}
-      {users.length > 6 && <span className="text-xs text-slate-500">+{users.length - 6}</span>}
     </div>
   );
 }

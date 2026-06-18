@@ -3,9 +3,10 @@ import {
   LiveKitRoom,
   GridLayout,
   ParticipantTile,
-  ControlBar,
   RoomAudioRenderer,
   useTracks,
+  useTrackToggle,
+  useRoomContext,
 } from '@livekit/components-react';
 import { Track, VideoPresets, type RoomOptions } from 'livekit-client';
 import '@livekit/components-styles';
@@ -64,16 +65,7 @@ export function VideoCall({ url, token, canPublish, onLeave }: VideoCallProps) {
       <div className={styles.grid}>
         <VideoTiles />
       </div>
-      <ControlBar
-        variation="minimal"
-        controls={{
-          microphone: canPublish,
-          camera: canPublish,
-          screenShare: canPublish,
-          chat: false,
-          leave: true,
-        }}
-      />
+      <ClassControls canPublish={canPublish} />
       <RoomAudioRenderer />
     </LiveKitRoom>
   );
@@ -92,5 +84,40 @@ function VideoTiles() {
     <GridLayout tracks={tracks} className={styles.gridLayout}>
       <ParticipantTile />
     </GridLayout>
+  );
+}
+
+/** Нижняя панель управления (Figma «Frame 100»): Микрофон / Камера / Выйти. */
+function ClassControls({ canPublish }: { canPublish: boolean }) {
+  const room = useRoomContext();
+  return (
+    <div className={styles.controls}>
+      {canPublish && <ToggleButton source={Track.Source.Microphone} label="Микрофон" icon="🎤" />}
+      {canPublish && <ToggleButton source={Track.Source.Camera} label="Камера" icon="📷" />}
+      <button className={styles.leave} onClick={() => room.disconnect()}>
+        <span aria-hidden>📞</span> Выйти
+      </button>
+    </div>
+  );
+}
+
+function ToggleButton({
+  source,
+  label,
+  icon,
+}: {
+  source: Track.Source.Microphone | Track.Source.Camera;
+  label: string;
+  icon: string;
+}) {
+  const { enabled, pending, toggle } = useTrackToggle({ source });
+  return (
+    <button
+      className={[styles.ctrl, enabled ? styles.ctrlOn : styles.ctrlOff].join(' ')}
+      onClick={() => void toggle()}
+      disabled={pending}
+    >
+      <span aria-hidden>{icon}</span> {label}
+    </button>
   );
 }
