@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IconButton } from '../../ui/IconButton';
 import bellSvg     from '../../../assets/icons/ui/ui-notification.svg';
 import settingsSvg from '../../../assets/icons/ui/ui-settings.svg';
@@ -35,12 +36,13 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
 }
 
 function DefaultActions() {
+  const navigate = useNavigate();
   return (
     <>
-      <IconButton aria-label="Профиль">
+      <IconButton aria-label="Профиль" onClick={() => navigate('/profile')}>
         <img src={profileSvg} alt="" />
       </IconButton>
-      <IconButton aria-label="Настройки">
+      <IconButton aria-label="Настройки" onClick={() => navigate('/settings')}>
         <img src={settingsSvg} alt="" />
       </IconButton>
       <IconButton aria-label="Уведомления">
