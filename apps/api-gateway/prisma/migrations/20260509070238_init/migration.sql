@@ -1,3 +1,7 @@
+-- Регистронезависимый email (колонка users.email имеет тип CITEXT).
+-- Без этого расширения CREATE TABLE ниже падает: type "citext" does not exist.
+CREATE EXTENSION IF NOT EXISTS citext;
+
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN');
 

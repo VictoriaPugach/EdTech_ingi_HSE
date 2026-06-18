@@ -30,6 +30,8 @@ model User {
   name         String
   role         UserRole @default(STUDENT)
   ageYears     Int?     @map("age_years")
+  // Аватар: data URL (картинка ужата на клиенте). Хранится в TEXT.
+  avatarUrl    String?  @map("avatar_url")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

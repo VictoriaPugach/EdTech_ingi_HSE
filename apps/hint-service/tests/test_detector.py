@@ -23,3 +23,29 @@ def test_clean_code_no_errors():
     code = "x = 5\nprint(x)"
     errors = detect_all(code, "python")
     assert errors == []
+
+
+def test_missing_colon_python():
+    code = "for i in range(3)\n    print(i)"
+    errors = detect_all(code, "python")
+    assert errors[0].error_type == "syntax/missing_colon"
+
+
+def test_invalid_indentation_python():
+    code = "def f():\nprint(1)"
+    errors = detect_all(code, "python")
+    assert errors[0].error_type == "syntax/invalid_indentation"
+
+
+def test_print_without_parens_python():
+    """Частая ошибка новичков (стиль Python 2)."""
+    code = 'print "hello"'
+    errors = detect_all(code, "python")
+    assert len(errors) == 1
+    assert "скобк" in errors[0].message.lower()
+
+
+def test_unterminated_string_python():
+    code = 's = "hello'
+    errors = detect_all(code, "python")
+    assert errors[0].error_type == "syntax/unmatched_quote"

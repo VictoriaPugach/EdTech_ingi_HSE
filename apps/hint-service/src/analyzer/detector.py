@@ -23,6 +23,9 @@ class DetectedError:
     error_type: HintErrorType
     location: CodeLocation
     symbol: str | None = None
+    # Готовый текст подсказки. Если задан — используется вместо шаблона по типу
+    # (нужно для точных формулировок из compile-детектора, напр. print без скобок).
+    message: str | None = None
 
 
 # ----------------------------------------------------------------------------
@@ -168,11 +171,19 @@ def detect_undefined_variables(code: str) -> list[DetectedError]:
 
 
 def detect_all(code: str, language: str) -> list[DetectedError]:
-    """Главная функция — комбинирует все детекторы. Дедуплицирует по локации."""
-    found = detect_syntax_errors(code, language)
+    """Главная функция — комбинирует все детекторы.
 
-    # Семантику запускаем только если синтаксис ОК (иначе AST поломан)
-    if not found and language == "python":
-        found.extend(detect_undefined_variables(code))
+    Для Python синтаксис ловим через compile() (точные позиции и широкое покрытие),
+    а если синтаксис в порядке — ищем семантику (необъявленные переменные).
+    Для остальных языков — синтаксический разбор по Tree-sitter.
+    """
+    if language == "python":
+        # Импорт здесь, чтобы избежать циклической зависимости модулей.
+        from .py_syntax import detect_python_syntax
 
-    return found
+        syntax = detect_python_syntax(code)
+        if syntax:
+            return syntax
+        return detect_undefined_variables(code)
+
+    return detect_syntax_errors(code, language)

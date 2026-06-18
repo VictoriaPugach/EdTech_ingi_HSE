@@ -392,3 +392,59 @@
   border-radius: $radius-2xl;
   overflow: hidden;
 }
+
+// ── Метки присутствия участников в редакторе (editorPresence.ts) ──────────────
+// Аватар у места, где человек печатает; имя раскрывается при наведении.
+:global(.cm-presence) {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: text-top;
+  margin: 0 2px;
+  padding: 1px;
+  border-radius: $radius-full;
+  background: var(--presence-color, #{$color-primary});
+  color: #fff;
+  user-select: none;
+  white-space: nowrap;
+  @include transition;
+}
+
+:global(.cm-presence-avatar) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+:global(.cm-presence-avatar img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:global(.cm-presence-label) {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 11px;
+  font-weight: 600;
+  @include transition(all, $transition-fast);
+}
+
+// Имя показываем при наведении на аватарку (как в Google Docs).
+:global(.cm-presence:hover .cm-presence-label) {
+  max-width: 160px;
+  opacity: 1;
+  padding: 0 6px 0 4px;
+}
+
+// y-codemirror рисует собственную подпись имени у каретки — прячем, чтобы не дублировать.
+:global(.cm-ySelectionInfo) {
+  display: none !important;
+}

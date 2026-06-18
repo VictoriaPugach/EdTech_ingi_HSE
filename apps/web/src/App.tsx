@@ -6,6 +6,8 @@ import { CreateCoursePage } from './pages/CreateCoursePage';
 import { CoursePage } from './pages/CoursePage';
 import { LessonPage } from './pages/LessonPage';
 import { SessionPage } from './pages/SessionPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { PrivateRoute } from './router/PrivateRoute';
 import { AppLayout } from './layouts/AppLayout';
 import { useAuth } from './hooks/useAuth';
@@ -73,6 +75,26 @@ export function App() {
           <PrivateRoute>
             <AppLayout>
               <LessonPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProfilePage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <SettingsPage />
             </AppLayout>
           </PrivateRoute>
         }

@@ -47,7 +47,7 @@ export function AppLayout({ children, fullHeight = false }: AppLayoutProps) {
         </button>
       ) : (
         <Sidebar
-          user={{ name: displayName, roleLabel, avatarSrc: profileAnton }}
+          user={{ name: displayName, roleLabel, avatarSrc: user?.avatarUrl ?? profileAnton }}
           level={{ title: 'Уровень 12', subtitle: '850/1200 XP', progress: 71 }}
           dailyGoal={{ title: 'Реши 3 задачи', subtitle: '2/3', progress: 66 }}
           onCollapse={toggleSidebar}

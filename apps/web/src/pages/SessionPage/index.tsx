@@ -9,6 +9,8 @@ import { python } from '@codemirror/lang-python';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { yCollab } from 'y-codemirror.next';
 import type { SessionRole } from '@edtech/shared';
+import { hintLinter } from './hintLinter';
+import { remotePresence } from './editorPresence';
 import { useAuth } from '../../hooks/useAuth';
 import { usePythonRunner } from '../../hooks/usePythonRunner';
 import { sessionsApi } from '../../services/sessions';
@@ -150,7 +152,9 @@ export function SessionPage() {
       });
 
       // 3. Реальная личность участника в awareness (курсор + список онлайн).
-      const me = { name: user.name, color: colorFromId(user.id) };
+      //    avatarUrl используется метками присутствия (editorPresence), name/color —
+      //    ещё и y-codemirror для цветной каретки.
+      const me = { name: user.name, color: colorFromId(user.id), avatarUrl: user.avatarUrl ?? null };
       provider.awareness.setLocalStateField('user', me);
 
       const updateUsers = () => {
@@ -222,6 +226,8 @@ export function SessionPage() {
           python(),
           keymap.of([...defaultKeymap, indentWithTab]),
           yCollab(yText, provider.awareness, { undoManager }),
+          remotePresence(ydoc, yText, provider.awareness),
+          hintLinter(() => token, 'python'),
           EditorView.lineWrapping,
           oneDark,
           editorHeightTheme,

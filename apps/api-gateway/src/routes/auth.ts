@@ -29,6 +29,7 @@ function toDto(u: {
   name: string;
   role: string;
   createdAt: Date;
+  avatarUrl?: string | null;
 }): UserDto {
   return {
     id: u.id,
@@ -36,6 +37,7 @@ function toDto(u: {
     name: u.name,
     role: u.role.toLowerCase() as UserDto['role'],
     createdAt: u.createdAt.toISOString(),
+    avatarUrl: u.avatarUrl ?? null,
   };
 }
 

@@ -23,6 +23,7 @@ export const userDtoSchema = {
     name: { type: 'string' },
     role: { type: 'string', enum: ['student', 'teacher', 'admin'] },
     createdAt: { type: 'string', format: 'date-time' },
+    avatarUrl: { type: 'string', nullable: true },
   },
   required: ['id', 'email', 'name', 'role', 'createdAt'],
 } as const;
