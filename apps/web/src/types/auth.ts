@@ -10,6 +10,8 @@ export interface User {
   name: string;
   role: UserRole;
   createdAt: string;
+  /** Аватар (data URL). Пока хранится только на клиенте — см. ProfilePage. */
+  avatarUrl?: string;
 }
 
 export interface AuthTokens {

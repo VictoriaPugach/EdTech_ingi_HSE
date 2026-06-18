@@ -17,6 +17,8 @@ export interface AuthContextValue extends AuthState {
   login:    (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout:   () => void;
+  /** Обновляет профиль локально (имя/аватар) и сохраняет в активном хранилище. */
+  updateProfile: (patch: Partial<Pick<User, 'name' | 'avatarUrl'>>) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -24,6 +26,12 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 function persistSession(token: string, user: User, remember: boolean): void {
   const storage = remember ? localStorage : sessionStorage;
   storage.setItem(TOKEN_KEY, token);
+  storage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+/** Перезаписывает только профиль в том хранилище, где лежит активная сессия. */
+function persistUser(user: User): void {
+  const storage = localStorage.getItem(TOKEN_KEY) ? localStorage : sessionStorage;
   storage.setItem(USER_KEY, JSON.stringify(user));
 }
 
@@ -99,9 +107,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
   }, []);
 
+  const updateProfile = useCallback((patch: Partial<Pick<User, 'name' | 'avatarUrl'>>) => {
+    setState((s) => {
+      if (!s.user) return s;
+      const updated = { ...s.user, ...patch };
+      persistUser(updated);
+      return { ...s, user: updated };
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, logout }),
-    [state, login, register, logout],
+    () => ({ ...state, login, register, logout, updateProfile }),
+    [state, login, register, logout, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
