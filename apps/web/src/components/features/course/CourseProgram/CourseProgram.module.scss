@@ -1,0 +1,83 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  width: 100%;
+  padding: $space-3;
+  text-align: left;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-lg;
+  background: $color-surface;
+  @include transition(all);
+  @include focus-ring;
+
+  &:not(:disabled):hover {
+    border-color: $color-primary-stroke;
+    background: $color-primary-subtle;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: $radius-full;
+}
+
+.done .status {
+  background: $color-secondary-light;
+  color: $color-secondary-dark;
+}
+
+.current .status {
+  background: $color-primary-light;
+  color: $color-primary;
+}
+
+.locked .status {
+  background: $color-border-soft;
+  color: $color-text-muted;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.index {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include truncate;
+}
+
+.meta {
+  flex-shrink: 0;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}

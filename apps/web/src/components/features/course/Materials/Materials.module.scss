@@ -1,0 +1,73 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3;
+  border-radius: $radius-lg;
+  @include transition(background-color);
+
+  &:hover {
+    background: $color-primary-subtle;
+  }
+}
+
+.fileBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: $radius-md;
+  background: $color-primary-light;
+  color: $color-primary;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.name {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include truncate;
+}
+
+.sub {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: $radius-md;
+  background: transparent;
+  color: $color-text-muted;
+  @include transition(all);
+  @include focus-ring;
+
+  &:hover {
+    background: $color-primary-light;
+    color: $color-primary;
+  }
+}

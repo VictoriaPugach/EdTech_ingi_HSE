@@ -11,6 +11,9 @@ from .templates import render
 
 def _to_hint(err: DetectedError, age: int | None) -> Hint:
     message, cue = render(err.error_type, symbol=err.symbol, age=age)
+    # Точный текст из детектора (если есть) важнее шаблона по типу.
+    if err.message:
+        message = err.message
     return Hint(
         error_type=err.error_type,
         message=message,

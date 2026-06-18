@@ -8,6 +8,14 @@ const schema = z.object({
   REALTIME_WS_PATH: z.string().default('/ws'),
   REDIS_URL: z.string().url().default('redis://redis:6379'),
   DATABASE_URL: z.string().url().optional(),
+  // Общий с API Gateway секрет для верификации сессионного JWT (НФТ-5).
+  JWT_SECRET: z.string().default('change-me-in-production-use-32-bytes-of-randomness'),
+  // Требовать валидный токен на WS-подключении. В dev — false (открытый доступ,
+  // см. NIR), в prod — true.
+  REQUIRE_AUTH: z
+    .string()
+    .default('false')
+    .transform((v) => v === 'true' || v === '1'),
 });
 
 const parsed = schema.safeParse(process.env);

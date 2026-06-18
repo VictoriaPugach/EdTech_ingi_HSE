@@ -1,0 +1,109 @@
+@use '../../../../styles/variables' as *;
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.text {
+  font-size: $font-size-base;
+  line-height: $line-height-loose;
+  color: $color-text-secondary;
+  white-space: pre-line;
+}
+
+.callout {
+  padding: $space-4;
+  border-radius: $radius-lg;
+  border-left: 4px solid;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+}
+
+.tone-info {
+  background: $color-accent-blue;
+  border-color: $color-primary;
+  color: $color-text-primary;
+}
+
+.tone-warning {
+  background: $color-error-light;
+  border-color: $color-warning;
+  color: $color-text-primary;
+}
+
+.code {
+  margin: 0;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: $color-text-primary;
+
+  pre {
+    margin: 0;
+    padding: $space-4;
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: $color-surface;
+  }
+}
+
+.codeLang {
+  padding: $space-2 $space-4;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  color: $color-primary-stroke;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.image {
+  width: 100%;
+  border-radius: $radius-lg;
+}
+
+.video {
+  display: inline-flex;
+  align-items: center;
+  padding: $space-3 $space-4;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  background: $color-primary-light;
+  border-radius: $radius-lg;
+}
+
+.quiz {
+  padding: $space-4;
+  background: $color-primary-subtle;
+  border-radius: $radius-lg;
+}
+
+.quizQuestion {
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $space-3;
+}
+
+.quizOptions {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  list-style: none;
+
+  li {
+    padding: $space-2 $space-3;
+    background: $color-surface;
+    border: 1px solid $color-border-soft;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+  }
+}
+
+.empty {
+  padding: $space-6 0;
+  color: $color-text-muted;
+}

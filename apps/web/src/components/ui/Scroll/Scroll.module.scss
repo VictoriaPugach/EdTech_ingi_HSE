@@ -1,0 +1,27 @@
+@use '../../../styles/variables' as *;
+
+.scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  // --- Кастомная тонкая полоса прокрутки ------------------------------------
+  scrollbar-width: thin;
+  scrollbar-color: $color-primary-stroke transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-primary-stroke;
+    border-radius: $radius-full;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $color-primary;
+  }
+}
