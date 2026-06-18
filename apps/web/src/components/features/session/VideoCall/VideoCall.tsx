@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import {
   LiveKitRoom,
-  GridLayout,
   ParticipantTile,
   RoomAudioRenderer,
   useTracks,
@@ -10,6 +9,9 @@ import {
 } from '@livekit/components-react';
 import { Track, VideoPresets, type RoomOptions } from 'livekit-client';
 import '@livekit/components-styles';
+import {
+  MicIcon, MicOffIcon, CameraIcon, CameraOffIcon, PhoneOffIcon,
+} from '../../../ui/icons';
 import styles from './VideoCall.module.scss';
 
 interface VideoCallProps {
@@ -62,16 +64,14 @@ export function VideoCall({ url, token, canPublish, onLeave }: VideoCallProps) {
       data-lk-theme="default"
       className={styles.room}
     >
-      <div className={styles.grid}>
-        <VideoTiles />
-      </div>
+      <VideoTiles />
       <ClassControls canPublish={canPublish} />
       <RoomAudioRenderer />
     </LiveKitRoom>
   );
 }
 
-/** Плитки участников: камеры + демонстрация экрана. GridLayout сам пагинирует на многих. */
+/** Главное окно (4:3, чтобы не обрезать лица) + ряд миниатюр остальных участников. */
 function VideoTiles() {
   const tracks = useTracks(
     [
@@ -80,22 +80,47 @@ function VideoTiles() {
     ],
     { onlySubscribed: false },
   );
+  const [main, ...rest] = tracks;
+
   return (
-    <GridLayout tracks={tracks} className={styles.gridLayout}>
-      <ParticipantTile />
-    </GridLayout>
+    <div className={styles.tiles}>
+      {main && (
+        <div className={styles.mainTile}>
+          <ParticipantTile trackRef={main} />
+        </div>
+      )}
+      {rest.length > 0 && (
+        <div className={styles.thumbs}>
+          {rest.map((t, i) => (
+            <div key={i} className={styles.thumb}>
+              <ParticipantTile trackRef={t} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-/** Нижняя панель управления (Figma «Frame 100»): Микрофон / Камера / Выйти. */
+/** Кнопки управления рядом с камерой (Figma): микрофон / камера / выйти. */
 function ClassControls({ canPublish }: { canPublish: boolean }) {
   const room = useRoomContext();
   return (
     <div className={styles.controls}>
-      {canPublish && <ToggleButton source={Track.Source.Microphone} label="Микрофон" icon="🎤" />}
-      {canPublish && <ToggleButton source={Track.Source.Camera} label="Камера" icon="📷" />}
-      <button className={styles.leave} onClick={() => room.disconnect()}>
-        <span aria-hidden>📞</span> Выйти
+      {canPublish && (
+        <ToggleButton source={Track.Source.Microphone} OnIcon={MicIcon} OffIcon={MicOffIcon} label="Микрофон" />
+      )}
+      {canPublish && (
+        <ToggleButton source={Track.Source.Camera} OnIcon={CameraIcon} OffIcon={CameraOffIcon} label="Камера" />
+      )}
+      <button
+        type="button"
+        className={`${styles.ctrl} ${styles.leave}`}
+        onClick={() => room.disconnect()}
+        aria-label="Выйти из звонка"
+        title="Выйти"
+      >
+        <PhoneOffIcon width={20} height={20} />
       </button>
     </div>
   );
@@ -103,21 +128,27 @@ function ClassControls({ canPublish }: { canPublish: boolean }) {
 
 function ToggleButton({
   source,
+  OnIcon,
+  OffIcon,
   label,
-  icon,
 }: {
   source: Track.Source.Microphone | Track.Source.Camera;
+  OnIcon: (p: { width?: number; height?: number }) => JSX.Element;
+  OffIcon: (p: { width?: number; height?: number }) => JSX.Element;
   label: string;
-  icon: string;
 }) {
   const { enabled, pending, toggle } = useTrackToggle({ source });
+  const Icon = enabled ? OnIcon : OffIcon;
   return (
     <button
-      className={[styles.ctrl, enabled ? styles.ctrlOn : styles.ctrlOff].join(' ')}
+      type="button"
+      className={`${styles.ctrl} ${enabled ? styles.on : styles.off}`}
       onClick={() => void toggle()}
       disabled={pending}
+      aria-label={label}
+      title={label}
     >
-      <span aria-hidden>{icon}</span> {label}
+      <Icon width={20} height={20} />
     </button>
   );
 }

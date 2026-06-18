@@ -8,17 +8,52 @@
   gap: $space-3;
 }
 
-.grid {
+.tiles {
   flex: 1;
   min-height: 0;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  overflow: hidden;
 }
 
-.gridLayout {
+// Главное окно — стандартное 4:3, лица не обрезаются.
+.mainTile {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: #11151f;
+  flex-shrink: 0;
+}
+
+// Ряд миниатюр остальных участников.
+.thumbs {
+  display: flex;
+  gap: $space-2;
+  overflow-x: auto;
+  @include hide-scrollbar;
+  flex-shrink: 0;
+}
+
+.thumb {
+  width: 88px;
+  aspect-ratio: 4 / 3;
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: #11151f;
+  flex-shrink: 0;
+}
+
+// Плитки LiveKit заполняют контейнер, видео — cover.
+.mainTile :global(.lk-participant-tile),
+.thumb :global(.lk-participant-tile) {
+  width: 100%;
   height: 100%;
+  border-radius: inherit;
 }
 
-// Нижняя панель: Микрофон / Камера / Выйти (Figma «Frame 100»).
+// ── Кнопки управления рядом с камерой ──────────────────────────────────────
 .controls {
   flex-shrink: 0;
   display: flex;
@@ -27,47 +62,36 @@
   gap: $space-3;
 }
 
-.ctrl,
-.leave {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-2;
-  padding: $space-2 $space-4;
-  border-radius: $radius-md;
-  background: $color-surface;
+.ctrl {
+  @include flex-center;
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-full;
   border: 1.5px solid $color-border-soft;
-  font-family: $font-family-heading;
-  font-weight: $font-weight-semibold;
-  font-size: $font-size-sm;
+  background: $color-surface;
+  color: $color-text-secondary;
   cursor: pointer;
   @include transition;
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
-// Включено — зелёный акцент, выключено — серый.
-.ctrlOn {
+.on {
   border-color: $color-secondary;
+  background: $color-secondary-light;
   color: $color-secondary-dark;
 }
 
-.ctrlOff {
+.off {
   color: $color-text-muted;
 
-  &:hover {
-    border-color: $color-secondary;
-    color: $color-secondary-dark;
-  }
+  &:hover { border-color: $color-primary-stroke; color: $color-primary; }
 }
 
 .leave {
-  color: $color-error;
   border-color: $color-error-light;
+  background: $color-error-light;
+  color: $color-error;
 
-  &:hover {
-    background: $color-error-light;
-  }
+  &:hover { background: $color-error; color: $color-text-inverse; }
 }

@@ -101,7 +101,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     setError('');
     setLoading(true);
     try {
-      await login({ email: email.trim(), password, rememberMe: remember });
+      await login({ email: email.trim(), password: password.trim(), rememberMe: remember });
       onSuccess();
     } catch (err) {
       if (err instanceof AuthApiError) {
@@ -184,7 +184,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     }
     setLoading(true);
     try {
-      await register({ email: email.trim(), password, name: name.trim(), role });
+      await register({ email: email.trim(), password: password.trim(), name: name.trim(), role });
       onSuccess();
     } catch (err) {
       if (err instanceof AuthApiError) {

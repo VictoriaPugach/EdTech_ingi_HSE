@@ -93,6 +93,13 @@
 .dotWait { background: $color-warning; }
 .dotOff  { background: $color-error; }
 
+.headerIcons {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin-left: $space-2;
+}
+
 // ── Баннеры ────────────────────────────────────────────────────────────────
 .banner,
 .bannerError {
@@ -104,10 +111,172 @@
 .banner      { background: #FFF7E6; color: #92670A; }
 .bannerError { background: $color-error-light; color: $color-error; }
 
-// ── Видео-карточка (верхний ряд) ───────────────────────────────────────────
+// ── Тело: левая (презентация + код) и правая (видео + чат) колонки ──────────
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: $space-5;
+}
+
+.leftCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+.rightCol {
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+@media (max-width: #{$bp-xl - 1}) {
+  .rightCol { width: 300px; }
+}
+
+// ── Презентация (сворачиваемая) ────────────────────────────────────────────
+.presentation {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: $color-surface;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-2xl;
+  overflow: hidden;
+}
+
+.presHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $color-border-soft;
+}
+
+.presTabs { display: flex; gap: $space-2; }
+
+.presTab {
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  padding: 4px 10px;
+  border-radius: $radius-md;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.presTabActive { color: $color-primary; background: $color-primary-light; }
+
+.presClose {
+  @include flex-center;
+  width: 30px; height: 30px;
+  border-radius: $radius-md;
+  border: none;
+  background: $color-bg;
+  color: $color-text-muted;
+  cursor: pointer;
+  &:hover { background: $color-border-soft; }
+}
+
+.presBody {
+  flex: 1;
+  min-height: 0;
+  @include flex-center;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-6;
+  text-align: center;
+  color: $color-text-muted;
+}
+.presBodyTitle { font-weight: $font-weight-semibold; color: $color-text-secondary; }
+.presBodyHint  { font-size: $font-size-sm; }
+
+// ── Консоль кода (тёмная) ──────────────────────────────────────────────────
+.console {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #141E34;
+  border-radius: $radius-2xl;
+  overflow: hidden;
+}
+
+.consoleHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.macDots { display: flex; gap: 6px; }
+.macDot  { width: 11px; height: 11px; border-radius: 50%; }
+.macRed    { background: #FF5F57; }
+.macYellow { background: #FEBC2E; }
+.macGreen  { background: #28C840; }
+
+.fileName {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: #9AA4B8;
+}
+
+.presToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: $space-2;
+  padding: 4px 10px;
+  border-radius: $radius-md;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #C7D0E0;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  @include transition;
+  &:hover { background: rgba(255, 255, 255, 0.08); }
+}
+
+.peers {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  overflow: hidden;
+}
+
+.peer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+.peerDot { width: 8px; height: 8px; border-radius: 50%; }
+
+.editorHost {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ── Правая колонка: видео + чат ────────────────────────────────────────────
 .videoCard {
   flex-shrink: 0;
-  height: 280px;
+  height: 360px;
   background: $color-primary-subtle;
   border: 1px solid $color-border-soft;
   border-radius: $radius-2xl;
@@ -147,76 +316,11 @@
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
-// ── Рабочий ряд: тёмная консоль кода + чат ─────────────────────────────────
-.workRow {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  gap: $space-5;
-}
-
-.console {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: #141E34;
-  border-radius: $radius-2xl;
-  overflow: hidden;
-}
-
-.consoleHeader {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: $space-3;
-  padding: $space-3 $space-4;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.macDots { display: flex; gap: 6px; }
-.macDot  { width: 11px; height: 11px; border-radius: 50%; }
-.macRed    { background: #FF5F57; }
-.macYellow { background: #FEBC2E; }
-.macGreen  { background: #28C840; }
-
-.fileName {
-  font-family: $font-family-mono;
-  font-size: $font-size-xs;
-  color: #9AA4B8;
-}
-
-.peers {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: $space-2;
-}
-
-.peer {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-semibold;
-}
-.peerDot { width: 8px; height: 8px; border-radius: 50%; }
-
-.editorHost {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
 .chatCard {
-  width: 320px;
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
   background: $color-surface;
   border: 1px solid $color-border-soft;
   border-radius: $radius-2xl;
   overflow: hidden;
-}
-
-@media (max-width: #{$bp-xl - 1}) {
-  .chatCard { width: 280px; }
 }

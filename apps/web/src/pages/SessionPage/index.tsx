@@ -12,6 +12,11 @@ import type { SessionRole } from '@edtech/shared';
 import { useAuth } from '../../hooks/useAuth';
 import { sessionsApi } from '../../services/sessions';
 import { Chat, type ChatItem } from '../../components/features/session/Chat';
+import { IconButton } from '../../components/ui/IconButton';
+import { CameraIcon, PresentationIcon, ChevronDownIcon } from '../../components/ui/icons';
+import profileSvg from '../../assets/icons/ui/ui-profile.svg';
+import settingsSvg from '../../assets/icons/ui/ui-settings.svg';
+import bellSvg from '../../assets/icons/ui/ui-notification.svg';
 import styles from './SessionPage.module.scss';
 
 // Видео грузим лениво: тяжёлый LiveKit-бандл не попадает в основной чанк и
@@ -75,6 +80,7 @@ export function SessionPage() {
   const [anonymous, setAnonymous] = useState(false);
   const [messages, setMessages] = useState<ChatItem[]>([]);
   const [elapsed, setElapsed] = useState(0);
+  const [presentationOpen, setPresentationOpen] = useState(false);
 
   // Видеозвонок (LiveKit). Подключаем лениво по кнопке — чтобы не нагружать
   // SFU и канал, пока видео реально не нужно.
@@ -290,10 +296,15 @@ export function SessionPage() {
         <div className={styles.headerActions}>
           <span className={styles.role}>{ROLE_LABEL[role]}</span>
           <button className={styles.copyBtn} onClick={() => navigator.clipboard.writeText(window.location.href)}>
-            🔗 Скопировать ссылку
+            Скопировать ссылку
           </button>
           <span className={styles.status}>
             <span className={`${styles.dot} ${statusMeta.cls}`} /> {statusMeta.label}
+          </span>
+          <span className={styles.headerIcons}>
+            <IconButton aria-label="Профиль"><img src={profileSvg} alt="" /></IconButton>
+            <IconButton aria-label="Настройки"><img src={settingsSvg} alt="" /></IconButton>
+            <IconButton aria-label="Уведомления"><img src={bellSvg} alt="" /></IconButton>
           </span>
         </div>
       </header>
@@ -306,57 +317,95 @@ export function SessionPage() {
       )}
       {videoError && <div className={styles.bannerError}>{videoError}</div>}
 
-      {/* ── Видео (верхний ряд) ────────────────────────────────────────── */}
-      <div className={styles.videoCard}>
-        {videoTok ? (
-          <Suspense fallback={<div className={styles.videoPlaceholder}>Загрузка видео…</div>}>
-            <VideoCall
-              url={videoTok.url}
-              token={videoTok.token}
-              canPublish={videoTok.canPublish}
-              onLeave={() => setVideoTok(null)}
-            />
-          </Suspense>
-        ) : (
-          <div className={styles.videoPlaceholder}>
-            <span className={styles.placeholderText}>Видеосвязь занятия</span>
-            <button className={styles.connectBtn} onClick={connectVideo} disabled={videoLoading}>
-              📹 {videoLoading ? 'Подключение…' : 'Подключиться к видео'}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* ── Рабочий ряд: консоль кода + чат ────────────────────────────── */}
-      <div className={styles.workRow}>
-        <section className={styles.console}>
-          <div className={styles.consoleHeader}>
-            <span className={styles.macDots}>
-              <span className={`${styles.macDot} ${styles.macRed}`} />
-              <span className={`${styles.macDot} ${styles.macYellow}`} />
-              <span className={`${styles.macDot} ${styles.macGreen}`} />
-            </span>
-            <span className={styles.fileName}>main.py</span>
-            <span className={styles.peers}>
-              {users.slice(0, 5).map((u) => (
-                <span key={u.clientId} className={styles.peer} style={{ color: u.color }} title={u.name}>
-                  <span className={styles.peerDot} style={{ backgroundColor: u.color }} />
-                  {u.name}
+      {/* ── Тело: слева презентация + код, справа видео + чат ───────────── */}
+      <div className={styles.body}>
+        <div className={styles.leftCol}>
+          {presentationOpen && (
+            <section className={styles.presentation}>
+              <div className={styles.presHeader}>
+                <div className={styles.presTabs}>
+                  <button className={`${styles.presTab} ${styles.presTabActive}`}>Презентация</button>
+                  <button className={styles.presTab}>Задание</button>
+                </div>
+                <button
+                  className={styles.presClose}
+                  onClick={() => setPresentationOpen(false)}
+                  aria-label="Свернуть презентацию"
+                  title="Свернуть"
+                >
+                  <ChevronDownIcon width={18} height={18} />
+                </button>
+              </div>
+              <div className={styles.presBody}>
+                <span className={styles.presBodyTitle}>Презентация занятия</span>
+                <span className={styles.presBodyHint}>
+                  Здесь появятся слайды урока. Сверните панель — редактор кода развернётся на всю высоту.
                 </span>
-              ))}
-            </span>
-          </div>
-          <div ref={editorHostRef} className={styles.editorHost} />
-        </section>
+              </div>
+            </section>
+          )}
 
-        <aside className={styles.chatCard}>
-          <Chat
-            messages={messages}
-            currentUserId={user?.id ?? ''}
-            canSend={role !== 'viewer'}
-            onSend={handleSend}
-          />
-        </aside>
+          <section className={styles.console}>
+            <div className={styles.consoleHeader}>
+              <span className={styles.macDots}>
+                <span className={`${styles.macDot} ${styles.macRed}`} />
+                <span className={`${styles.macDot} ${styles.macYellow}`} />
+                <span className={`${styles.macDot} ${styles.macGreen}`} />
+              </span>
+              <span className={styles.fileName}>main.py</span>
+              {!presentationOpen && (
+                <button
+                  className={styles.presToggle}
+                  onClick={() => setPresentationOpen(true)}
+                  title="Открыть презентацию"
+                >
+                  <PresentationIcon width={16} height={16} /> Презентация
+                </button>
+              )}
+              <span className={styles.peers}>
+                {users.slice(0, 4).map((u) => (
+                  <span key={u.clientId} className={styles.peer} style={{ color: u.color }} title={u.name}>
+                    <span className={styles.peerDot} style={{ backgroundColor: u.color }} />
+                    {u.name}
+                  </span>
+                ))}
+              </span>
+            </div>
+            <div ref={editorHostRef} className={styles.editorHost} />
+          </section>
+        </div>
+
+        <div className={styles.rightCol}>
+          <div className={styles.videoCard}>
+            {videoTok ? (
+              <Suspense fallback={<div className={styles.videoPlaceholder}>Загрузка видео…</div>}>
+                <VideoCall
+                  url={videoTok.url}
+                  token={videoTok.token}
+                  canPublish={videoTok.canPublish}
+                  onLeave={() => setVideoTok(null)}
+                />
+              </Suspense>
+            ) : (
+              <div className={styles.videoPlaceholder}>
+                <span className={styles.placeholderText}>Видеосвязь занятия</span>
+                <button className={styles.connectBtn} onClick={connectVideo} disabled={videoLoading}>
+                  <CameraIcon width={18} height={18} />
+                  {videoLoading ? 'Подключение…' : 'Подключиться к видео'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <aside className={styles.chatCard}>
+            <Chat
+              messages={messages}
+              currentUserId={user?.id ?? ''}
+              canSend={role !== 'viewer'}
+              onSend={handleSend}
+            />
+          </aside>
+        </div>
       </div>
     </div>
   );
