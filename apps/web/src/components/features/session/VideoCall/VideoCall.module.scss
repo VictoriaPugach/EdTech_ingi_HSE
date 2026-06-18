@@ -1,30 +1,27 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins'    as *;
 
+// Прозрачный контейнер — фон даёт белая карточка, никакого тёмного lk-theme.
 .room {
   display: flex;
   flex-direction: column;
-  height: 100%;
   gap: $space-3;
+  background: transparent !important;
 }
 
 .tiles {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: $space-2;
-  overflow: hidden;
 }
 
-// Главное окно — стандартное 4:3, лица не обрезаются.
+// Главное окно — стандартное 4:3 со скруглением, лица не обрезаются.
 .mainTile {
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   overflow: hidden;
   background: #11151f;
-  flex-shrink: 0;
 }
 
 // Ряд миниатюр остальных участников.
@@ -33,27 +30,32 @@
   gap: $space-2;
   overflow-x: auto;
   @include hide-scrollbar;
-  flex-shrink: 0;
 }
 
 .thumb {
-  width: 88px;
+  width: 92px;
   aspect-ratio: 4 / 3;
-  border-radius: $radius-md;
+  border-radius: $radius-lg;
   overflow: hidden;
   background: #11151f;
   flex-shrink: 0;
 }
 
-// Плитки LiveKit заполняют контейнер, видео — cover.
+// Плитки LiveKit заполняют контейнер и наследуют скругление (видео не торчит углами).
 .mainTile :global(.lk-participant-tile),
 .thumb :global(.lk-participant-tile) {
   width: 100%;
   height: 100%;
   border-radius: inherit;
+  overflow: hidden;
+  background: #11151f;
+
+  video {
+    border-radius: inherit;
+  }
 }
 
-// ── Кнопки управления рядом с камерой ──────────────────────────────────────
+// ── Кнопки управления рядом с камерой (на белом фоне карточки) ─────────────
 .controls {
   flex-shrink: 0;
   display: flex;
@@ -64,8 +66,8 @@
 
 .ctrl {
   @include flex-center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: $radius-full;
   border: 1.5px solid $color-border-soft;
   background: $color-surface;
