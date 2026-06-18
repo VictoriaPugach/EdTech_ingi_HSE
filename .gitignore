@@ -177,6 +177,7 @@ temp/
 .cursor/scratch/
 .cursor/agent-transcripts/
 .cursorignore.local
+.claude/
 
 # ---------- Документация курсовой / неисходники проекта ----------
 # Папка с документами курсовой и черновиками — не в git репозитория проекта
