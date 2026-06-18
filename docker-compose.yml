@@ -73,6 +73,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production-use-32-bytes-of-randomness}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-24h}
       HINT_SERVICE_URL: http://hint-service:4002
+      # Видео (LiveKit): URL — клиентский, ключ/секрет совпадают с infra/livekit/livekit.yaml
+      LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret_change_me_min_32_chars_long}
     ports:
       - '4000:4000'
     volumes:
@@ -114,6 +118,25 @@ services:
     depends_on:
       redis:    { condition: service_healthy }
       postgres: { condition: service_healthy }
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
+  # LiveKit SFU — медиасервер группового видео занятий (ADR video-livekit-sfu)
+  # Кластеризация через общий Redis. Токены выпускает API Gateway по роли.
+  # ---------------------------------------------------------------------------
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: edtech-livekit
+    restart: unless-stopped
+    command: ['--config', '/etc/livekit/livekit.yaml']
+    ports:
+      - '7880:7880'              # signaling (ws/http) — сюда подключается браузер
+      - '7881:7881'              # ICE/TCP fallback
+      - '50000-50020:50000-50020/udp'  # ICE/UDP (dev-диапазон)
+    volumes:
+      - ./infra/livekit/livekit.yaml:/etc/livekit/livekit.yaml:ro
+    depends_on:
+      redis: { condition: service_healthy }
     networks: [edtech-net]
 
   # ---------------------------------------------------------------------------
