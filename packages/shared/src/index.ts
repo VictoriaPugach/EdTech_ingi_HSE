@@ -38,9 +38,50 @@ export interface SessionDto {
   ownerId: string;
   title: string;
   language: SessionLanguage;
+  mode: SessionMode;
   inviteCode: string;
   createdAt: string;
   isActive: boolean;
+}
+
+/** Режим онлайн-занятия. */
+export type SessionMode = 'group' | 'single';
+
+/** Роль участника на занятии. */
+export type SessionRole = 'host' | 'editor' | 'viewer';
+
+/** Ответ POST /api/sessions/:id/join — токен и роль для подключения к WS/видео. */
+export interface JoinSessionDto {
+  /** Сессионный JWT для WebSocket Realtime Sync (claim sessionRole). */
+  token: string;
+  sessionId: string;
+  role: SessionRole;
+  mode: SessionMode;
+}
+
+export interface ChatMessageDto {
+  id: string;
+  sessionId: string;
+  userId: string | null;
+  authorName: string | null;
+  kind: 'user' | 'system';
+  body: string;
+  createdAt: string;
+}
+
+/**
+ * Ответ POST /api/sessions/:id/livekit-token — доступ к видеокомнате SFU LiveKit
+ * (ADR video-livekit-sfu). Токен короткоживущий, выпускается по роли участника.
+ */
+export interface LivekitTokenDto {
+  /** Access-токен LiveKit (JWT, подписан ключом медиасервера). */
+  token: string;
+  /** URL медиасервера для клиента (ws/wss). */
+  url: string;
+  /** Имя комнаты LiveKit (= id сессии). */
+  room: string;
+  /** Может ли участник публиковать камеру/микрофон (VIEWER — только смотрит). */
+  canPublish: boolean;
 }
 
 // ----------------------------------------------------------------------------
@@ -100,4 +141,125 @@ export interface HealthDto {
   version: string;
   uptimeSec: number;
   checks?: Record<string, 'ok' | 'fail'>;
+}
+
+// ----------------------------------------------------------------------------
+// Учебный контент: курсы / модули / уроки (BC-3 LMS)
+// Доменная модель и причины решений: docs/database-architecture.md
+// ----------------------------------------------------------------------------
+
+export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
+export type CourseStatus = 'draft' | 'published' | 'archived';
+export type LessonType = 'reading' | 'video' | 'practice' | 'quiz' | 'live_coding';
+
+export interface CourseSummaryDto {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  level: CourseLevel;
+  language: SessionLanguage;
+  coverUrl: string | null;
+  status: CourseStatus;
+  authorId: string | null;
+  estimatedHours: number | null;
+  /** Кол-во уроков во всех модулях (для карточки каталога). */
+  lessonsCount: number;
+  createdAt: string;
+}
+
+export interface LessonSummaryDto {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  type: LessonType;
+  durationMin: number | null;
+}
+
+export interface CourseModuleDto {
+  id: string;
+  title: string;
+  order: number;
+  lessons: LessonSummaryDto[];
+}
+
+export interface MaterialDto {
+  id: string;
+  title: string;
+  format: string;
+  sizeBytes: number | null;
+  url: string;
+}
+
+export interface CourseDetailDto extends CourseSummaryDto {
+  description: string | null;
+  modules: CourseModuleDto[];
+  materials: MaterialDto[];
+}
+
+/** Урок в payload создания курса. */
+export interface CreateLessonInput {
+  title: string;
+  summary?: string;
+  type?: LessonType;
+  durationMin?: number;
+}
+
+/** Модуль в payload создания курса. */
+export interface CreateCourseModuleInput {
+  title: string;
+  lessons?: CreateLessonInput[];
+}
+
+/** Тело запроса POST /api/courses (создаёт преподаватель/админ). */
+export interface CreateCourseInput {
+  title: string;
+  slug?: string;
+  summary?: string;
+  description?: string;
+  level?: CourseLevel;
+  language?: SessionLanguage;
+  coverUrl?: string;
+  status?: CourseStatus;
+  estimatedHours?: number;
+  modules?: CreateCourseModuleInput[];
+}
+
+export type ContentBlockKind = 'text' | 'code' | 'video' | 'image' | 'quiz' | 'callout';
+
+/** Блок наполнения урока. Форма `data` зависит от `kind` (docs/database-architecture.md §2.5). */
+export interface LessonContentBlockDto {
+  id: string;
+  order: number;
+  kind: ContentBlockKind;
+  data: Record<string, unknown>;
+}
+
+/** Соседний урок курса (для навигации по программе). */
+export interface LessonNavItemDto {
+  id: string;
+  title: string;
+  order: number;
+}
+
+export interface LessonDetailDto {
+  id: string;
+  title: string;
+  summary: string | null;
+  order: number;
+  type: LessonType;
+  durationMin: number | null;
+  course: {
+    id: string;
+    slug: string;
+    title: string;
+    level: CourseLevel;
+    language: SessionLanguage;
+    teacherName: string | null;
+  };
+  blocks: LessonContentBlockDto[];
+  materials: MaterialDto[];
+  /** Все уроки курса в порядке программы (для боковой навигации). */
+  siblings: LessonNavItemDto[];
 }

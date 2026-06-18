@@ -1,0 +1,99 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins'    as *;
+
+// Прозрачный контейнер — фон даёт белая карточка, никакого тёмного lk-theme.
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  background: transparent !important;
+}
+
+.tiles {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+// Главное окно — стандартное 4:3 со скруглением, лица не обрезаются.
+.mainTile {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  background: #11151f;
+}
+
+// Ряд миниатюр остальных участников.
+.thumbs {
+  display: flex;
+  gap: $space-2;
+  overflow-x: auto;
+  @include hide-scrollbar;
+}
+
+.thumb {
+  width: 92px;
+  aspect-ratio: 4 / 3;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: #11151f;
+  flex-shrink: 0;
+}
+
+// Плитки LiveKit заполняют контейнер и наследуют скругление (видео не торчит углами).
+.mainTile :global(.lk-participant-tile),
+.thumb :global(.lk-participant-tile) {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #11151f;
+
+  video {
+    border-radius: inherit;
+  }
+}
+
+// ── Кнопки управления рядом с камерой (на белом фоне карточки) ─────────────
+.controls {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $space-3;
+}
+
+.ctrl {
+  @include flex-center;
+  width: 42px;
+  height: 42px;
+  border-radius: $radius-full;
+  border: 1.5px solid $color-border-soft;
+  background: $color-surface;
+  color: $color-text-secondary;
+  cursor: pointer;
+  @include transition;
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.on {
+  border-color: $color-secondary;
+  background: $color-secondary-light;
+  color: $color-secondary-dark;
+}
+
+.off {
+  color: $color-text-muted;
+
+  &:hover { border-color: $color-primary-stroke; color: $color-primary; }
+}
+
+.leave {
+  border-color: $color-error-light;
+  background: $color-error-light;
+  color: $color-error;
+
+  &:hover { background: $color-error; color: $color-text-inverse; }
+}

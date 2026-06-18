@@ -1,0 +1,26 @@
+@use '../../../../styles/variables' as *;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-3 $space-4;
+  min-width: 4rem;
+  background: $color-primary-subtle;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+}
+
+.value {
+  font-family: $font-family-heading;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $color-text-primary;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}

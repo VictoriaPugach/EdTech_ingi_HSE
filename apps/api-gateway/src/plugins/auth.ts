@@ -17,7 +17,16 @@ declare module 'fastify' {
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { sub: string; role: 'student' | 'teacher' | 'admin' };
+    // Базовый пользовательский токен + опциональные session-claims, которые
+    // добавляются в сессионный токен при POST /api/sessions/:id/join (НФТ-5).
+    payload: {
+      sub: string;
+      role: 'student' | 'teacher' | 'admin';
+      name?: string;
+      sessionId?: string;
+      sessionRole?: 'HOST' | 'EDITOR' | 'VIEWER';
+      mode?: 'GROUP' | 'SINGLE';
+    };
     user: { sub: string; role: 'student' | 'teacher' | 'admin' };
   }
 }

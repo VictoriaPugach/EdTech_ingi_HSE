@@ -31,6 +31,12 @@ EXPOSE 5173
 CMD ["npm", "run", "dev"]
 
 FROM deps AS build
+# URL бэкенда/websocket вшиваются в бандл на этапе сборки (Vite).
+# Для прод-домена передаются как build-args (см. deploy/docker-compose.prod.yml).
+ARG VITE_API_URL=
+ARG VITE_WS_URL=
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_WS_URL=$VITE_WS_URL
 COPY tsconfig.base.json ./
 COPY packages/shared ./packages/shared
 COPY apps/web ./apps/web
@@ -38,5 +44,6 @@ WORKDIR /app/apps/web
 RUN npm run build
 
 FROM nginx:alpine AS prod
+COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80

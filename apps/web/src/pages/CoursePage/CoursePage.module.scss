@@ -1,0 +1,27 @@
+@use '../../styles/variables' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $space-4;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+.note {
+  padding: $space-8 0;
+  text-align: center;
+  color: $color-text-secondary;
+}

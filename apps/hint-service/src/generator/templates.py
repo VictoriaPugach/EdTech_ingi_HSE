@@ -27,7 +27,9 @@ def _age_tone(age: int | None) -> str:
     return "Маленькая деталь: не закрыта "
 
 
-def render(error_type: HintErrorType, *, symbol: str | None = None, age: int | None = None) -> tuple[str, VisualCue]:
+def render(
+    error_type: HintErrorType, *, symbol: str | None = None, age: int | None = None
+) -> tuple[str, VisualCue]:
     """Возвращает (текст, способ визуальной привязки)."""
 
     if error_type == "syntax/unmatched_paren":
@@ -41,7 +43,7 @@ def render(error_type: HintErrorType, *, symbol: str | None = None, age: int | N
     if error_type == "syntax/unmatched_quote":
         return (
             "Кажется, кавычки открылись, но не закрылись. Добавь парную кавычку, "
-            'чтобы текст внутри был «в обнимку».',
+            "чтобы текст внутри был «в обнимку».",
             "highlight",
         )
 
@@ -70,7 +72,13 @@ def render(error_type: HintErrorType, *, symbol: str | None = None, age: int | N
 
     if error_type == "semantic/undefined_function":
         if symbol:
-            return (f"Функция  {symbol}  ещё не объявлена. Создай её через  def  {symbol}(...) :", "tooltip")
+            return (
+                f"Функция  {symbol}  ещё не объявлена. Создай её через  def  {symbol}(...) :",
+                "tooltip",
+            )
         return ("Эта функция ещё не объявлена.", "tooltip")
 
-    return ("Что-то выглядит непривычно. Перечитай эту строку — возможно, потерялся символ.", "tooltip")
+    return (
+        "Что-то выглядит непривычно. Перечитай эту строку — возможно, потерялся символ.",
+        "tooltip",
+    )

@@ -1,0 +1,394 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins'    as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: $space-5;
+  padding: $space-6 $space-8;
+  background: #FAFAFC;
+  overflow: hidden;
+}
+
+// ── Шапка ──────────────────────────────────────────────────────────────────
+.header {
+  flex-shrink: 0;
+  @include flex-between;
+  align-items: center;
+  gap: $space-4;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: $font-family-heading;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: 2px 10px;
+  border-radius: $radius-full;
+  background: $color-error-light;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  color: $color-error;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-shrink: 0;
+}
+
+.role {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  background: $color-primary-light;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+}
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  background: $color-primary-light;
+  border: none;
+  padding: 6px 12px;
+  border-radius: $radius-md;
+  cursor: pointer;
+  @include transition;
+
+  &:hover { background: $color-primary-hovered; }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dotOk   { background: $color-success; }
+.dotWait { background: $color-warning; }
+.dotOff  { background: $color-error; }
+
+.headerIcons {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin-left: $space-2;
+}
+
+// ── Баннеры ────────────────────────────────────────────────────────────────
+.banner,
+.bannerError {
+  flex-shrink: 0;
+  font-size: $font-size-xs;
+  padding: $space-2 $space-4;
+  border-radius: $radius-md;
+}
+.banner      { background: #FFF7E6; color: #92670A; }
+.bannerError { background: $color-error-light; color: $color-error; }
+
+// ── Тело: левая (презентация + код) и правая (видео + чат) колонки ──────────
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: $space-5;
+}
+
+.leftCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+.rightCol {
+  width: 420px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+@media (max-width: #{$bp-xl - 1}) {
+  .rightCol { width: 360px; }
+}
+
+// ── Презентация (сворачиваемая) ────────────────────────────────────────────
+.presentation {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: $color-surface;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-2xl;
+  overflow: hidden;
+}
+
+.presHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $color-border-soft;
+}
+
+.presTabs { display: flex; gap: $space-2; }
+
+.presTab {
+  font-family: $font-family-heading;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  padding: 4px 10px;
+  border-radius: $radius-md;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.presTabActive { color: $color-primary; background: $color-primary-light; }
+
+.presClose {
+  @include flex-center;
+  width: 30px; height: 30px;
+  border-radius: $radius-md;
+  border: none;
+  background: $color-bg;
+  color: $color-text-muted;
+  cursor: pointer;
+  &:hover { background: $color-border-soft; }
+}
+
+.presBody {
+  flex: 1;
+  min-height: 0;
+  @include flex-center;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-6;
+  text-align: center;
+  color: $color-text-muted;
+}
+.presBodyTitle { font-weight: $font-weight-semibold; color: $color-text-secondary; }
+.presBodyHint  { font-size: $font-size-sm; }
+
+// ── Консоль кода (тёмная) ──────────────────────────────────────────────────
+.console {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #141E34;
+  border-radius: $radius-2xl;
+  overflow: hidden;
+}
+
+.consoleHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.macDots { display: flex; gap: 6px; }
+.macDot  { width: 11px; height: 11px; border-radius: 50%; }
+.macRed    { background: #FF5F57; }
+.macYellow { background: #FEBC2E; }
+.macGreen  { background: #28C840; }
+
+.fileName {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: #9AA4B8;
+}
+
+.presToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: $space-2;
+  padding: 4px 10px;
+  border-radius: $radius-md;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #C7D0E0;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  @include transition;
+  &:hover { background: rgba(255, 255, 255, 0.08); }
+}
+
+.peers {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  overflow: hidden;
+}
+
+.peer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+.peerDot { width: 8px; height: 8px; border-radius: 50%; }
+
+.runBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: $radius-md;
+  border: none;
+  background: $color-primary;
+  color: $color-text-inverse;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-xs;
+  cursor: pointer;
+  @include transition;
+
+  &:hover:not(:disabled) { background: $color-primary-hover; }
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
+}
+
+.editorHost {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ── Панель «Вывод» под редактором ──────────────────────────────────────────
+.output {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 38%;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0E1626;
+}
+
+.outputHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-2 $space-4;
+}
+
+.outputTitle {
+  font-family: $font-family-heading;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9AA4B8;
+}
+
+.outputClose {
+  @include flex-center;
+  width: 24px; height: 24px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: #9AA4B8;
+  cursor: pointer;
+  &:hover { background: rgba(255, 255, 255, 0.08); color: $color-text-inverse; }
+}
+
+.outputBody {
+  margin: 0;
+  padding: 0 $space-4 $space-4;
+  overflow: auto;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  line-height: $line-height-normal;
+  color: #E6EAF2;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+// ── Правая колонка: видео + чат ────────────────────────────────────────────
+.videoCard {
+  flex-shrink: 0;
+  background: $color-surface;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-2xl;
+  padding: $space-4;
+  overflow: hidden;
+}
+
+.videoPlaceholder {
+  min-height: 220px;
+  @include flex-center;
+  flex-direction: column;
+  gap: $space-4;
+  color: $color-text-secondary;
+}
+
+.placeholderText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.connectBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+  border-radius: $radius-md;
+  background: $color-primary;
+  color: $color-text-inverse;
+  border: none;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  @include transition;
+
+  &:hover:not(:disabled) { background: $color-primary-hover; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.chatCard {
+  flex: 1;
+  min-height: 0;
+  background: $color-surface;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-2xl;
+  overflow: hidden;
+}

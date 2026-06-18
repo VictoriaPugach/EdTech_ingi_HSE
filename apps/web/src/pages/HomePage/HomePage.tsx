@@ -12,6 +12,7 @@ import {
   AchievementsSection,
 } from '../../components/features/home';
 import { useAuth } from '../../hooks/useAuth';
+import { StartClassButton } from '../../components/features/class/StartClassButton';
 import {
   ACHIEVEMENTS,
   PROJECTS,
@@ -43,6 +44,9 @@ export function HomePage() {
         }
         subtitle="Продолжай обучение и создавай крутые проекты!"
       />
+
+      {/* ── CTA преподавателя: создать живое занятие (у студентов скрыто) ──── */}
+      <StartClassButton size="md" />
 
       {/* ── Быстрые действия (4 карточки) ─────────────────────────────────── */}
       <QuickActionsRow>

@@ -24,19 +24,22 @@ enum UserRole {
 }
 
 model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  email        String    @unique @db.Citext
-  passwordHash String    @map("password_hash")
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.Citext
+  passwordHash String   @map("password_hash")
   name         String
-  role         UserRole  @default(STUDENT)
-  ageYears     Int?      @map("age_years")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  role         UserRole @default(STUDENT)
+  ageYears     Int?     @map("age_years")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  ownedSessions     Session[]      @relation("SessionOwner")
-  participations    Participant[]
-  errorEvents       ErrorEvent[]
-  achievements      Achievement[]
+  ownedSessions   Session[]     @relation("SessionOwner")
+  participations  Participant[]
+  errorEvents     ErrorEvent[]
+  achievements    Achievement[]
+  authoredCourses Course[]      @relation("CourseAuthor")
+  enrollments     Enrollment[]
+  chatMessages    ChatMessage[]
 
   @@map("users")
 }
@@ -50,32 +53,63 @@ enum SessionLanguage {
   JAVASCRIPT
 }
 
+// Режим онлайн-занятия (экраны Online_class):
+//   GROUP  — все ученики редактируют совместно;
+//   SINGLE — кодит один ученик, остальные наблюдают.
+enum SessionMode {
+  GROUP
+  SINGLE
+}
+
+// Роль участника на занятии:
+//   HOST   — преподаватель (управление, комментарии в коде, ФТ-11);
+//   EDITOR — ученик с правом редактирования;
+//   VIEWER — наблюдатель (read-only редактор).
+enum SessionRole {
+  HOST
+  EDITOR
+  VIEWER
+}
+
+enum ChatMessageKind {
+  USER
+  SYSTEM
+}
+
 model Session {
-  id          String          @id @default(uuid()) @db.Uuid
-  ownerId     String          @map("owner_id") @db.Uuid
-  title       String
-  language    SessionLanguage @default(PYTHON)
-  inviteCode  String          @unique @map("invite_code")
-  isActive    Boolean         @default(true) @map("is_active")
-  createdAt   DateTime        @default(now()) @map("created_at")
-  closedAt    DateTime?       @map("closed_at")
+  id         String          @id @default(uuid()) @db.Uuid
+  ownerId    String          @map("owner_id") @db.Uuid
+  // Необязательная привязка живой сессии (BC-1) к уроку курса (экраны Online_class).
+  lessonId   String?         @map("lesson_id") @db.Uuid
+  title      String
+  language   SessionLanguage @default(PYTHON)
+  mode       SessionMode     @default(GROUP)
+  inviteCode String          @unique @map("invite_code")
+  isActive   Boolean         @default(true) @map("is_active")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  closedAt   DateTime?       @map("closed_at")
 
   owner        User          @relation("SessionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  lesson       Lesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
   participants Participant[]
   snapshots    Snapshot[]
   errorEvents  ErrorEvent[]
+  chatMessages ChatMessage[]
 
   @@index([ownerId])
   @@index([inviteCode])
+  @@index([lessonId])
   @@map("sessions")
 }
 
 model Participant {
-  id        String   @id @default(uuid()) @db.Uuid
-  sessionId String   @map("session_id") @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  joinedAt  DateTime @default(now()) @map("joined_at")
-  leftAt    DateTime? @map("left_at")
+  id         String      @id @default(uuid()) @db.Uuid
+  sessionId  String      @map("session_id") @db.Uuid
+  userId     String      @map("user_id") @db.Uuid
+  role       SessionRole @default(EDITOR)
+  joinedAt   DateTime    @default(now()) @map("joined_at")
+  leftAt     DateTime?   @map("left_at")
+  lastSeenAt DateTime?   @map("last_seen_at")
 
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -86,19 +120,37 @@ model Participant {
   @@map("participants")
 }
 
+// Сообщения чата онлайн-занятия. Горячий путь — Y.Array('chat') в Y.Doc сессии;
+// сюда Realtime Sync зеркалит сообщения для истории и модерации.
+// См. ADR architecture-decision-records/in-session-chat.
+model ChatMessage {
+  id        String          @id @default(uuid()) @db.Uuid
+  sessionId String          @map("session_id") @db.Uuid
+  userId    String?         @map("user_id") @db.Uuid
+  kind      ChatMessageKind @default(USER)
+  body      String
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, createdAt])
+  @@map("chat_messages")
+}
+
 // ----------------------------------------------------------------------------
 // Снапшоты CRDT-документа (BC-1, ФТ-5: история изменений / откат)
 // ----------------------------------------------------------------------------
 
 model Snapshot {
-  id         String   @id @default(uuid()) @db.Uuid
-  sessionId  String   @map("session_id") @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
   // Бинарный Yjs-state (Y.encodeStateAsUpdate). Восстанавливается через Y.applyUpdate.
-  state      Bytes
+  state     Bytes
   // Текстовое представление для предпросмотра в UI (необязательно).
-  preview    String?
-  opCount    Int      @map("op_count")
-  createdAt  DateTime @default(now()) @map("created_at")
+  preview   String?
+  opCount   Int      @map("op_count")
+  createdAt DateTime @default(now()) @map("created_at")
 
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
@@ -111,18 +163,18 @@ model Snapshot {
 // ----------------------------------------------------------------------------
 
 model ErrorEvent {
-  id         String   @id @default(uuid()) @db.Uuid
-  userId     String   @map("user_id") @db.Uuid
-  sessionId  String?  @map("session_id") @db.Uuid
-  errorType  String   @map("error_type")
-  language   String
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  sessionId   String?  @map("session_id") @db.Uuid
+  errorType   String   @map("error_type")
+  language    String
   // Координаты ошибки в коде
-  line       Int?
-  column     Int?
+  line        Int?
+  column      Int?
   // Был ли запрошен hint и был ли он полезен (ставится из UI)
-  hintShown  Boolean  @default(false) @map("hint_shown")
+  hintShown   Boolean  @default(false) @map("hint_shown")
   hintHelpful Boolean? @map("hint_helpful")
-  createdAt  DateTime @default(now()) @map("created_at")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   session Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
@@ -137,16 +189,213 @@ model ErrorEvent {
 // ----------------------------------------------------------------------------
 
 model Achievement {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
+  id       String   @id @default(uuid()) @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
   // Код достижения (например "first_fix", "streak_5", "helpful_peer").
-  code      String
-  earnedAt  DateTime @default(now()) @map("earned_at")
-  metadata  Json?
+  code     String
+  earnedAt DateTime @default(now()) @map("earned_at")
+  metadata Json?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, code])
   @@index([userId])
   @@map("achievements")
+}
+
+// ----------------------------------------------------------------------------
+// Учебный контент: курсы → модули → уроки → блоки контента
+// Полное описание модели и причины решений: docs/database-architecture.md
+// ----------------------------------------------------------------------------
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LessonType {
+  READING
+  VIDEO
+  PRACTICE
+  QUIZ
+  LIVE_CODING
+}
+
+enum ContentBlockKind {
+  TEXT
+  CODE
+  VIDEO
+  IMAGE
+  QUIZ
+  CALLOUT
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum LessonProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Course {
+  id             String          @id @default(uuid()) @db.Uuid
+  slug           String          @unique
+  title          String
+  summary        String?
+  description    String?
+  level          CourseLevel     @default(BEGINNER)
+  language       SessionLanguage @default(PYTHON)
+  coverUrl       String?         @map("cover_url")
+  status         CourseStatus    @default(DRAFT)
+  authorId       String?         @map("author_id") @db.Uuid
+  estimatedHours Int?            @map("estimated_hours")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  author      User?           @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  modules     CourseModule[]
+  materials   Material[]
+  enrollments Enrollment[]
+  tags        TagsOnCourses[]
+
+  @@index([status])
+  @@index([authorId])
+  @@map("courses")
+}
+
+model Tag {
+  id      String          @id @default(uuid()) @db.Uuid
+  slug    String          @unique
+  name    String
+  courses TagsOnCourses[]
+
+  @@map("tags")
+}
+
+model TagsOnCourses {
+  courseId String @map("course_id") @db.Uuid
+  tagId    String @map("tag_id") @db.Uuid
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, tagId])
+  @@index([tagId])
+  @@map("tags_on_courses")
+}
+
+model CourseModule {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @map("course_id") @db.Uuid
+  title     String
+  order     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@map("course_modules")
+}
+
+model Lesson {
+  id          String     @id @default(uuid()) @db.Uuid
+  moduleId    String     @map("module_id") @db.Uuid
+  title       String
+  summary     String?
+  order       Int
+  type        LessonType @default(READING)
+  durationMin Int?       @map("duration_min")
+  isPublished Boolean    @default(true) @map("is_published")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  module    CourseModule         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  blocks    LessonContentBlock[]
+  materials Material[]
+  progress  LessonProgress[]
+  sessions  Session[]
+
+  @@index([moduleId])
+  @@map("lessons")
+}
+
+model LessonContentBlock {
+  id        String           @id @default(uuid()) @db.Uuid
+  lessonId  String           @map("lesson_id") @db.Uuid
+  order     Int
+  kind      ContentBlockKind
+  // Полезная нагрузка зависит от kind (контракт форм — docs/database-architecture.md §2.5).
+  data      Json
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_content_blocks")
+}
+
+model Material {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String?  @map("course_id") @db.Uuid
+  lessonId  String?  @map("lesson_id") @db.Uuid
+  title     String
+  format    String
+  sizeBytes Int?     @map("size_bytes")
+  url       String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([lessonId])
+  @@map("materials")
+}
+
+model Enrollment {
+  id              String           @id @default(uuid()) @db.Uuid
+  courseId        String           @map("course_id") @db.Uuid
+  userId          String           @map("user_id") @db.Uuid
+  status          EnrollmentStatus @default(ACTIVE)
+  progressPercent Int              @default(0) @map("progress_percent")
+  enrolledAt      DateTime         @default(now()) @map("enrolled_at")
+  completedAt     DateTime?        @map("completed_at")
+
+  course   Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@unique([courseId, userId])
+  @@index([userId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id           String               @id @default(uuid()) @db.Uuid
+  enrollmentId String               @map("enrollment_id") @db.Uuid
+  lessonId     String               @map("lesson_id") @db.Uuid
+  status       LessonProgressStatus @default(NOT_STARTED)
+  score        Int?
+  completedAt  DateTime?            @map("completed_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, lessonId])
+  @@index([lessonId])
+  @@map("lesson_progress")
 }

@@ -1,0 +1,7 @@
+@use '../../../../styles/variables' as *;
+
+.error {
+  margin-top: $space-2;
+  font-size: $font-size-xs;
+  color: $color-error;
+}

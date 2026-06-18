@@ -22,6 +22,7 @@ import * as decoding from 'lib0/decoding';
 import type { WebSocket } from 'ws';
 import { logger } from '../logger.js';
 import { pub, sub, channelForSession } from '../redis.js';
+import type { ConnectionIdentity } from '../auth.js';
 
 const MESSAGE_SYNC = 0;
 const MESSAGE_AWARENESS = 1;
@@ -40,6 +41,7 @@ export class Room {
   readonly doc: Y.Doc;
   readonly awareness: awarenessProtocol.Awareness;
   readonly conns = new Set<WebSocket>();
+  private readonly identities = new Map<WebSocket, ConnectionIdentity>();
   private readonly options: RoomOptions;
   private readonly redisChannel: string;
   private readonly onRedisMessage: (channel: string, message: Buffer) => void;
@@ -87,8 +89,9 @@ export class Room {
   // Подключение клиента
   // -----------------------------------------------------------------
 
-  addConnection(ws: WebSocket): void {
+  addConnection(ws: WebSocket, identity?: ConnectionIdentity): void {
     this.conns.add(ws);
+    if (identity) this.identities.set(ws, identity);
 
     // Sync step 1 — отправляем клиенту state vector, чтобы он догнался
     {
@@ -119,6 +122,7 @@ export class Room {
   removeConnection(ws: WebSocket): void {
     if (this.conns.has(ws)) {
       this.conns.delete(ws);
+      this.identities.delete(ws);
       // Чистим awareness-состояние клиента
       const controlledIds = (ws as WebSocket & { __awarenessId?: number }).__awarenessId;
       if (controlledIds !== undefined) {
@@ -140,7 +144,20 @@ export class Room {
         case MESSAGE_SYNC: {
           const encoder = encoding.createEncoder();
           encoding.writeVarUint(encoder, MESSAGE_SYNC);
-          syncProtocol.readSyncMessage(decoder, encoder, this.doc, ws);
+          const syncType = decoding.readVarUint(decoder);
+          const role = this.identities.get(ws)?.role ?? 'EDITOR';
+
+          if (syncType === syncProtocol.messageYjsSyncStep1) {
+            // Запрос состояния — безопасен для чтения, отвечаем даже VIEWER'у.
+            syncProtocol.readSyncStep1(decoder, encoder, this.doc);
+          } else if (role !== 'VIEWER') {
+            // Применяем правки только тем, у кого есть право редактирования.
+            if (syncType === syncProtocol.messageYjsSyncStep2) {
+              syncProtocol.readSyncStep2(decoder, this.doc, ws);
+            } else if (syncType === syncProtocol.messageYjsUpdate) {
+              syncProtocol.readUpdate(decoder, this.doc, ws);
+            }
+          }
           // syncProtocol запишет ответ в encoder; шлём, только если есть полезная нагрузка
           if (encoding.length(encoder) > 1) {
             ws.send(encoding.toUint8Array(encoder));

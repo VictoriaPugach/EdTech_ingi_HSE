@@ -8,6 +8,7 @@ import {
   TrophyIcon,
   StarIcon,
   TargetIcon,
+  ChevronLeftIcon,
 } from '../../ui/icons';
 import { NavItem } from './components/NavItem';
 import { StatBlock } from './components/StatBlock';
@@ -23,6 +24,8 @@ interface SidebarProps {
   /** Прогресс уровня и ежедневной цели. */
   level:       { title: string; subtitle: string; progress: number };
   dailyGoal:   { title: string; subtitle: string; progress: number };
+  /** Свернуть панель (если не задан — кнопка сворачивания не показывается). */
+  onCollapse?: () => void;
 }
 
 const NAV_ITEMS = [
@@ -38,13 +41,18 @@ const NAV_ITEMS = [
  * Содержит логотип, основную навигацию, прогресс-блоки и карточку пользователя.
  * Переиспользуется на всех экранах внутри AppLayout.
  */
-export function Sidebar({ user, level, dailyGoal }: SidebarProps) {
+export function Sidebar({ user, level, dailyGoal, onCollapse }: SidebarProps) {
   const navigate = useNavigate();
 
   return (
     <aside className={styles.sidebar} aria-label="Основная навигация">
       <div className={styles.logo}>
         <img src={logoSvg} alt="LOGO" className={styles.logoImg} />
+        {onCollapse && (
+          <button className={styles.collapse} onClick={onCollapse} aria-label="Свернуть меню" title="Свернуть меню">
+            <ChevronLeftIcon width={20} height={20} />
+          </button>
+        )}
       </div>
 
       <nav className={styles.nav}>

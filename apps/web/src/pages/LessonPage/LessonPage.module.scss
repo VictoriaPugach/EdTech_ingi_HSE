@@ -1,0 +1,57 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins'    as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back {
+  align-self: flex-start;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+
+  &:hover {
+    color: $color-primary;
+    text-decoration: none;
+  }
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: $space-5;
+
+  @media (max-width: #{$bp-lg - 1}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+  min-width: 0;
+}
+
+.info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: $space-4;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+.note {
+  padding: $space-8 0;
+  text-align: center;
+  color: $color-text-secondary;
+}
