@@ -1,0 +1,59 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins'    as *;
+
+.page {
+  @include flex-col;
+  gap: $space-5;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.card {
+  @include card;
+  @include flex-col;
+  gap: $space-6;
+  padding: $space-8;
+  border: 1px solid $color-border-soft;
+}
+
+.avatarBlock {
+  display: flex;
+  align-items: center;
+  gap: $space-5;
+}
+
+.avatarActions {
+  @include flex-col;
+  gap: $space-2;
+  align-items: flex-start;
+}
+
+.fields {
+  @include flex-col;
+  gap: $space-4;
+}
+
+.actions {
+  display: flex;
+  gap: $space-3;
+}
+
+.alert,
+.success {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 $space-4;
+  border-radius: $radius-lg;
+  font-size: $font-size-sm;
+}
+
+.alert {
+  background: $color-error-light;
+  color: $color-error;
+}
+
+.success {
+  background: $color-secondary-light;
+  color: $color-secondary-dark;
+}
