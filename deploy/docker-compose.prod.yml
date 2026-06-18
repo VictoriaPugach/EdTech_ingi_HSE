@@ -10,6 +10,13 @@
 #    https://DOMAIN/ws*     → realtime-sync (WebSocket / CRDT)
 #  Видео (LiveKit) подключается напрямую к LIVEKIT_URL (рекомендуется LiveKit Cloud).
 #  Postgres и Redis наружу НЕ публикуются — только во внутренней сети.
+#
+#  Образы приложения параметризованы (IMAGE_PREFIX/IMAGE_TAG):
+#    • CI/CD: образы собираются в GitHub Actions и пушатся в ghcr.io; сервер их
+#      только тянет — `docker compose pull && up -d --no-build`
+#      (IMAGE_PREFIX=ghcr.io/<owner>/<repo>, IMAGE_TAG=<git-sha>).
+#    • Вручную (без registry): переменные не заданы → дефолт edtech/<svc>:local,
+#      `up -d --build` соберёт и протегирует образы локально.
 # =============================================================================
 
 name: edtech-prod
@@ -33,6 +40,7 @@ services:
     networks: [edtech]
 
   web:
+    image: ${IMAGE_PREFIX:-edtech}/web:${IMAGE_TAG:-local}
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
@@ -44,6 +52,7 @@ services:
     networks: [edtech]
 
   api-gateway:
+    image: ${IMAGE_PREFIX:-edtech}/api-gateway:${IMAGE_TAG:-local}
     build:
       context: ..
       dockerfile: apps/api-gateway/Dockerfile
@@ -67,6 +76,7 @@ services:
     networks: [edtech]
 
   realtime-sync:
+    image: ${IMAGE_PREFIX:-edtech}/realtime-sync:${IMAGE_TAG:-local}
     build:
       context: ..
       dockerfile: apps/realtime-sync/Dockerfile
@@ -88,6 +98,7 @@ services:
     networks: [edtech]
 
   hint-service:
+    image: ${IMAGE_PREFIX:-edtech}/hint-service:${IMAGE_TAG:-local}
     build:
       context: ../apps/hint-service
       dockerfile: Dockerfile
