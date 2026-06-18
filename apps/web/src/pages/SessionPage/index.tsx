@@ -10,10 +10,11 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { yCollab } from 'y-codemirror.next';
 import type { SessionRole } from '@edtech/shared';
 import { useAuth } from '../../hooks/useAuth';
+import { usePythonRunner } from '../../hooks/usePythonRunner';
 import { sessionsApi } from '../../services/sessions';
 import { Chat, type ChatItem } from '../../components/features/session/Chat';
 import { IconButton } from '../../components/ui/IconButton';
-import { CameraIcon, PresentationIcon, ChevronDownIcon } from '../../components/ui/icons';
+import { CameraIcon, PresentationIcon, ChevronDownIcon, PlayIcon } from '../../components/ui/icons';
 import profileSvg from '../../assets/icons/ui/ui-profile.svg';
 import settingsSvg from '../../assets/icons/ui/ui-settings.svg';
 import bellSvg from '../../assets/icons/ui/ui-notification.svg';
@@ -71,8 +72,11 @@ export function SessionPage() {
 
   const editorHostRef = useRef<HTMLDivElement | null>(null);
   const yChatRef = useRef<Y.Array<ChatItem> | null>(null);
+  const yTextRef = useRef<Y.Text | null>(null);
   const roleRef = useRef<SessionRole>('editor');
   const messagesMapRef = useRef<Map<string, ChatItem>>(new Map());
+
+  const runner = usePythonRunner();
 
   const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [users, setUsers] = useState<RemoteUser[]>([]);
@@ -190,6 +194,7 @@ export function SessionPage() {
 
       // 6. Редактор кода (тёмная консоль). Для наблюдателя — «только чтение».
       const yText = ydoc.getText('codemirror');
+      yTextRef.current = yText;
       const onSync = (isSynced: boolean) => {
         if (!isSynced) return;
         if (editable && yText.length === 0) {
@@ -232,6 +237,7 @@ export function SessionPage() {
         provider.destroy();
         ydoc.destroy();
         yChatRef.current = null;
+        yTextRef.current = null;
       };
     })();
 
@@ -276,6 +282,11 @@ export function SessionPage() {
       setVideoLoading(false);
     }
   }, [token, sessionId]);
+
+  // Запуск кода из редактора (Python в браузере через Pyodide).
+  const handleRun = useCallback(() => {
+    void runner.run(yTextRef.current?.toString() ?? '');
+  }, [runner]);
 
   const statusMeta = {
     connecting: { cls: styles.dotWait, label: 'Подключение…' },
@@ -363,15 +374,35 @@ export function SessionPage() {
                 </button>
               )}
               <span className={styles.peers}>
-                {users.slice(0, 4).map((u) => (
+                {users.slice(0, 3).map((u) => (
                   <span key={u.clientId} className={styles.peer} style={{ color: u.color }} title={u.name}>
                     <span className={styles.peerDot} style={{ backgroundColor: u.color }} />
                     {u.name}
                   </span>
                 ))}
               </span>
+              <button
+                className={styles.runBtn}
+                onClick={handleRun}
+                disabled={runner.running}
+                title="Запустить код (Python)"
+              >
+                <PlayIcon width={15} height={15} />
+                {runner.running ? (runner.loading ? 'Загрузка…' : 'Выполняется…') : 'Запустить'}
+              </button>
             </div>
             <div ref={editorHostRef} className={styles.editorHost} />
+            {runner.output !== null && (
+              <div className={styles.output}>
+                <div className={styles.outputHeader}>
+                  <span className={styles.outputTitle}>Вывод</span>
+                  <button className={styles.outputClose} onClick={runner.clear} aria-label="Скрыть вывод">
+                    <ChevronDownIcon width={16} height={16} />
+                  </button>
+                </div>
+                <pre className={styles.outputBody}>{runner.output}</pre>
+              </div>
+            )}
           </section>
         </div>
 

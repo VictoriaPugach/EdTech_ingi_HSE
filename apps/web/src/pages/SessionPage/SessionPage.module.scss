@@ -267,10 +267,79 @@
 }
 .peerDot { width: 8px; height: 8px; border-radius: 50%; }
 
+.runBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: $radius-md;
+  border: none;
+  background: $color-primary;
+  color: $color-text-inverse;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-xs;
+  cursor: pointer;
+  @include transition;
+
+  &:hover:not(:disabled) { background: $color-primary-hover; }
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
+}
+
 .editorHost {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+// ── Панель «Вывод» под редактором ──────────────────────────────────────────
+.output {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 38%;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0E1626;
+}
+
+.outputHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-2 $space-4;
+}
+
+.outputTitle {
+  font-family: $font-family-heading;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9AA4B8;
+}
+
+.outputClose {
+  @include flex-center;
+  width: 24px; height: 24px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: #9AA4B8;
+  cursor: pointer;
+  &:hover { background: rgba(255, 255, 255, 0.08); color: $color-text-inverse; }
+}
+
+.outputBody {
+  margin: 0;
+  padding: 0 $space-4 $space-4;
+  overflow: auto;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  line-height: $line-height-normal;
+  color: #E6EAF2;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 // ── Правая колонка: видео + чат ────────────────────────────────────────────
