@@ -1,0 +1,16 @@
+.room {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #14141c;
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.gridLayout {
+  height: 100%;
+}
