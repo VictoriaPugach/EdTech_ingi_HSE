@@ -393,6 +393,73 @@
   overflow: hidden;
 }
 
+// =============================================================================
+//  Мобильная адаптация (телефоны, < 768px)
+//  Двухколоночное тело складывается в один столбик; редактор и чат получают
+//  фиксированную рабочую высоту, страница прокручивается целиком (см. AppLayout).
+// =============================================================================
+@media (max-width: #{$bp-md - 1}) {
+  .page {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+    gap: $space-4;
+    padding: $space-4;
+  }
+
+  // Шапка: заголовок и действия — в две строки, кнопки переносятся.
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $space-3;
+  }
+
+  // Заголовок не должен заезжать под кнопку «меню» (AppLayout .reopen).
+  .titleRow {
+    padding-left: 48px;
+    min-height: 40px;
+  }
+
+  .headerActions {
+    flex-wrap: wrap;
+    row-gap: $space-2;
+  }
+
+  .headerIcons {
+    margin-left: auto;
+  }
+
+  // Тело: код сверху, видео + чат снизу.
+  .body {
+    flex-direction: column;
+  }
+
+  .rightCol {
+    width: 100%;
+  }
+
+  .consoleHeader {
+    flex-wrap: wrap;
+  }
+
+  .peers {
+    margin-left: 0;
+  }
+
+  // flex:1 в столбце без фиксированной высоты схлопывается — задаём минимумы.
+  .console {
+    min-height: 58vh;
+  }
+
+  .presentation {
+    min-height: 40vh;
+  }
+
+  .chatCard {
+    min-height: 340px;
+  }
+}
+
 // ── Метки присутствия участников в редакторе (editorPresence.ts) ──────────────
 // Аватар у места, где человек печатает; имя раскрывается при наведении.
 :global(.cm-presence) {
