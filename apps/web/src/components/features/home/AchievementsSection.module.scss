@@ -94,3 +94,13 @@
   min-width: 28px;
   text-align: right;
 }
+
+// --- Мобильная адаптация (< 768px) -------------------------------------------
+@media (max-width: #{$bp-md - 1}) {
+  .badge { padding: $space-2; }
+
+  .icon {
+    width: 52px;
+    height: 52px;
+  }
+}

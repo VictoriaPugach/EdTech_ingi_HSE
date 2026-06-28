@@ -103,3 +103,23 @@
   gap: $space-3;
   margin-top: auto;
 }
+
+// --- Мобильная адаптация (< 768px) -------------------------------------------
+@media (max-width: #{$bp-md - 1}) {
+  .body {
+    gap: $space-3;
+    margin-bottom: $space-4;
+  }
+
+  .illustration {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@media (max-width: #{$bp-sm - 1}) {
+  // Кнопки «В онлайн класс» / «Напомнить» не помещаются в ряд — в столбик.
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}
