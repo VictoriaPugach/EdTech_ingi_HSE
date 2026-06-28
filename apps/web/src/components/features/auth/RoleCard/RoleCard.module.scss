@@ -62,3 +62,35 @@
   margin-top: $space-2;
   width: 100%;
 }
+
+// --- Мобильная адаптация (телефоны, < 640px) ---------------------------------
+// Карточки роли остаются в ряд, но становятся компактнее, чтобы форма
+// регистрации помещалась на один экран.
+@media (max-width: #{$bp-sm - 1}) {
+  .card {
+    padding: $space-3 $space-2;
+    gap: $space-1;
+    border-width: 1px;
+    border-radius: $radius-xl;
+  }
+
+  .iconWrap {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+  }
+
+  .title {
+    font-size: $font-size-xs;
+    line-height: 1.2;
+  }
+
+  // Описание прячем — заголовка и кнопки достаточно для выбора роли.
+  .description {
+    display: none;
+  }
+
+  .selectBtn {
+    margin-top: $space-1;
+  }
+}

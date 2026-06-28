@@ -22,6 +22,17 @@
 
 }
 
+// ─── Мобильный хедер (бренд) ─────────────────────────────────────────────────
+// На десктопе скрыт — там логотип в hero-панели. На мобильном фиксируется сверху.
+.mobileHeader {
+  display: none;
+}
+
+.mobileHeaderLogo {
+  height: 28px;
+  width: auto;
+}
+
 .content {
   width: 100%;
   max-width: 1300px;
@@ -349,4 +360,78 @@
   font-size: $font-size-sm;
   font-family: $font-family-small;
   color: $color-error;
+}
+
+// =============================================================================
+//  Мобильная адаптация (телефоны, < 640px)
+//  Hero-панель скрыта до lg — остаётся компактная карточка входа, помещающаяся
+//  на один экран. Сверху — фиксированный хедер с логотипом.
+// =============================================================================
+@media (max-width: #{$bp-sm - 1}) {
+  $mobile-header-h: 52px;
+
+  // Фиксированный хедер с брендом.
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $mobile-header-h;
+    z-index: $z-sticky;
+    background: $color-surface;
+    border-bottom: 1px solid $color-border-soft;
+    box-shadow: $shadow-sm;
+  }
+
+  // Контент опускается под фиксированный хедер и прижимается к верху.
+  .content {
+    min-height: calc(100vh - #{$mobile-header-h});
+    padding-top: $mobile-header-h;
+  }
+
+  .authPanel {
+    align-items: flex-start;
+    padding: $space-4;
+    padding-top: $space-5;
+  }
+
+  // Компактная карточка.
+  .card {
+    padding: $space-5 $space-4;
+    border-radius: $radius-2xl;
+  }
+
+  .cardHeader {
+    margin-bottom: $space-4;
+  }
+
+  .cardTitle {
+    font-size: $font-size-xl;
+  }
+
+  .cardSubtitle {
+    font-size: $font-size-xs;
+  }
+
+  // Поджимаем форму и блок выбора роли.
+  .form {
+    gap: $space-2;
+  }
+
+  .roleSection {
+    margin-top: $space-3;
+    padding-top: $space-3;
+  }
+
+  .roleSectionTitle {
+    margin-bottom: $space-2;
+  }
+
+  // Карточки роли остаются в ряд (две колонки), но компактнее.
+  .roleGrid {
+    gap: $space-2;
+  }
 }

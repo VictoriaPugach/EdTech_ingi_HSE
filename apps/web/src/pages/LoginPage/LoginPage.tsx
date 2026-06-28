@@ -265,6 +265,12 @@ export function LoginPage() {
 
   return (
     <div className={styles.page}>
+      {/* Фиксированный мобильный хедер: бренд виден при скролле (на десктопе скрыт,
+          там логотип живёт в hero-панели). */}
+      <header className={styles.mobileHeader}>
+        <img src={logoSvg} alt="EdTech Collab" className={styles.mobileHeaderLogo} />
+      </header>
+
       <div className={styles.content}>
         {/* ── Левая: hero-панель ───────────────────────────────────────── */}
         <section className={styles.hero}>
