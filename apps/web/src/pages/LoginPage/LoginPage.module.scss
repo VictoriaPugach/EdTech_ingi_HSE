@@ -368,8 +368,6 @@
 //  на один экран. Сверху — фиксированный хедер с логотипом.
 // =============================================================================
 @media (max-width: #{$bp-sm - 1}) {
-  $mobile-header-h: 52px;
-
   // Фиксированный хедер с брендом.
   .mobileHeader {
     display: flex;
@@ -379,7 +377,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: $mobile-header-h;
+    height: $header-mobile-h;
     z-index: $z-sticky;
     background: $color-surface;
     border-bottom: 1px solid $color-border-soft;
@@ -388,8 +386,8 @@
 
   // Контент опускается под фиксированный хедер и прижимается к верху.
   .content {
-    min-height: calc(100vh - #{$mobile-header-h});
-    padding-top: $mobile-header-h;
+    min-height: calc(100vh - #{$header-mobile-h});
+    padding-top: $header-mobile-h;
   }
 
   .authPanel {
