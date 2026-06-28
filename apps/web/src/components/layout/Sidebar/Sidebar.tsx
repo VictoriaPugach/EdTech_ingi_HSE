@@ -26,6 +26,8 @@ interface SidebarProps {
   dailyGoal:   { title: string; subtitle: string; progress: number };
   /** Свернуть панель (если не задан — кнопка сворачивания не показывается). */
   onCollapse?: () => void;
+  /** Вызывается при переходе по пункту меню (на мобильном — закрывает панель). */
+  onNavigate?: () => void;
 }
 
 const NAV_ITEMS = [
@@ -41,7 +43,7 @@ const NAV_ITEMS = [
  * Содержит логотип, основную навигацию, прогресс-блоки и карточку пользователя.
  * Переиспользуется на всех экранах внутри AppLayout.
  */
-export function Sidebar({ user, level, dailyGoal, onCollapse }: SidebarProps) {
+export function Sidebar({ user, level, dailyGoal, onCollapse, onNavigate }: SidebarProps) {
   const navigate = useNavigate();
 
   return (
@@ -57,7 +59,7 @@ export function Sidebar({ user, level, dailyGoal, onCollapse }: SidebarProps) {
 
       <nav className={styles.nav}>
         {NAV_ITEMS.map((it) => (
-          <NavItem key={it.to} {...it} />
+          <NavItem key={it.to} {...it} onNavigate={onNavigate} />
         ))}
       </nav>
 
