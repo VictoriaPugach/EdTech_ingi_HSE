@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/layout/PageHeader';
 import {
@@ -14,6 +15,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { StartClassButton } from '../../components/features/class/StartClassButton';
 import { Button } from '../../components/ui/Button';
+import { sessionsApi } from '../../services/sessions';
 import {
   ACHIEVEMENTS,
   PROJECTS,
@@ -29,12 +31,6 @@ import styles from './HomePage.module.scss';
 // демо-аккаунтам — добавьте их email сюда.
 const DEMO_EMAILS = new Set(['teacher@test.com']);
 
-// ⚠️ ВРЕМЕННО (для защиты): общий урок с фиксированным id комнаты. Все участники,
-// зайдя по этой ссылке, попадают в один и тот же онлайн-класс (редактор + чат).
-// Сессии с таким id нет в БД → SessionPage подключается в анонимном режиме к
-// общей realtime-комнате. После защиты этот блок и кнопку можно удалить.
-const DEFENSE_SESSION_ID = 'defense';
-
 /**
  * Главная страница (дашборд ученика).
  * Композиция переиспользуемых блоков: PageHeader + QuickActions + расписание +
@@ -43,7 +39,21 @@ const DEFENSE_SESSION_ID = 'defense';
  */
 export function HomePage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [defenseLoading, setDefenseLoading] = useState(false);
+
+  // ВРЕМЕННО (для защиты): входим в единое общее занятие. Бэкенд делает
+  // get-or-create реальной сессии → у всех роли + видео LiveKit, одна комната.
+  const joinDefense = async () => {
+    if (!token) return;
+    setDefenseLoading(true);
+    try {
+      const session = await sessionsApi.joinDefense(token);
+      navigate(`/s/${session.id}`);
+    } catch {
+      setDefenseLoading(false);
+    }
+  };
 
   const firstName = (user?.name ?? 'Ученик').split(' ')[0];
   const isManager = user?.role === 'teacher' || user?.role === 'admin';
@@ -75,7 +85,7 @@ export function HomePage() {
             Общий онлайн-класс для всех участников — заходите одновременно в одну комнату.
           </p>
         </div>
-        <Button className={styles.defenseBtn} onClick={() => navigate(`/s/${DEFENSE_SESSION_ID}`)}>
+        <Button className={styles.defenseBtn} loading={defenseLoading} onClick={joinDefense}>
           Присоединиться
         </Button>
       </div>

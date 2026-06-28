@@ -57,6 +57,18 @@ export const sessionsApi = {
     return handleResponse<SessionDto>(res);
   },
 
+  /**
+   * ВРЕМЕННО (для защиты): войти в единое общее занятие «Защита».
+   * Get-or-create на бэкенде — все участники получают одну и ту же сессию.
+   */
+  async joinDefense(token: string): Promise<SessionDto> {
+    const res = await fetch(`${SESSIONS_BASE}/defense`, {
+      method: 'POST',
+      headers: authHeaders(token),
+    });
+    return handleResponse<SessionDto>(res);
+  },
+
   /** Список своих сессий. */
   async listMine(token: string): Promise<SessionDto[]> {
     const res = await fetch(SESSIONS_BASE, { headers: authHeaders(token) });
