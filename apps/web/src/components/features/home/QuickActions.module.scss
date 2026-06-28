@@ -117,3 +117,27 @@
     border-color: $color-accent-yellow-h !important;
   }
 }
+
+// --- Мобильная адаптация (< 768px) -------------------------------------------
+// Карточки в один столбец становятся компактнее: убираем большую мин-высоту.
+@media (max-width: #{$bp-md - 1}) {
+  .card {
+    min-height: 0;
+    padding: $space-4;
+    gap: $space-3;
+  }
+
+  .title {
+    font-size: $font-size-base;
+  }
+
+  .illustration {
+    width: 32px;
+    height: 32px;
+  }
+
+  .iconImg {
+    width: 32px;
+    height: 32px;
+  }
+}

@@ -30,3 +30,10 @@
 .pad-sm   { padding: $space-3; }
 .pad-md   { padding: $space-5; }
 .pad-lg   { padding: $space-6; }
+
+// --- Мобильная адаптация (< 768px) -------------------------------------------
+// Крупные карточки занимают меньше места — паддинги поджимаются.
+@media (max-width: #{$bp-md - 1}) {
+  .pad-md { padding: $space-4; }
+  .pad-lg { padding: $space-4; }
+}
