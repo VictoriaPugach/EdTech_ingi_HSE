@@ -414,29 +414,31 @@
     gap: $space-3;
   }
 
-  // Заголовок не должен заезжать под кнопку «меню» (AppLayout .reopen).
-  .titleRow {
-    padding-left: 48px;
-    min-height: 40px;
-  }
-
   .headerActions {
     flex-wrap: wrap;
     row-gap: $space-2;
   }
 
+  // Профиль/настройки/уведомления переехали в фиксированный хедер приложения.
   .headerIcons {
-    margin-left: auto;
+    display: none;
   }
 
-  // Тело: код сверху, видео + чат снизу.
+  // Тело в один столбик; колонки «растворяем», чтобы переставить элементы:
+  // камера → код → чат (display: contents выносит детей в общий поток .body).
   .body {
     flex-direction: column;
   }
 
+  .leftCol,
   .rightCol {
-    width: 100%;
+    display: contents;
   }
+
+  .videoCard    { order: 1; }
+  .presentation { order: 2; }
+  .console      { order: 3; }
+  .chatCard     { order: 4; }
 
   .consoleHeader {
     flex-wrap: wrap;
@@ -448,7 +450,7 @@
 
   // flex:1 в столбце без фиксированной высоты схлопывается — задаём минимумы.
   .console {
-    min-height: 58vh;
+    min-height: 55vh;
   }
 
   .presentation {
