@@ -1,7 +1,13 @@
 import { useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { useAuth } from '../../hooks/useAuth';
 import { MenuIcon } from '../../components/ui/icons';
+import { IconButton } from '../../components/ui/IconButton';
+import logoSvg from '../../assets/icons/logo/logo.svg';
+import profileSvg from '../../assets/icons/ui/ui-profile.svg';
+import settingsSvg from '../../assets/icons/ui/ui-settings.svg';
+import bellSvg from '../../assets/icons/ui/ui-notification.svg';
 import profileAnton from '../../assets/images/illustrations/profile-anton.png';
 import styles from './AppLayout.module.scss';
 
@@ -28,6 +34,7 @@ const isMobileViewport = () =>
 
 export function AppLayout({ children, fullHeight = false }: AppLayoutProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(
     () => isMobileViewport() || localStorage.getItem(COLLAPSE_KEY) === '1',
   );
@@ -56,6 +63,26 @@ export function AppLayout({ children, fullHeight = false }: AppLayoutProps) {
 
   return (
     <div className={[styles.layout, fullHeight ? styles.fullHeight : ''].filter(Boolean).join(' ')}>
+      {/* Фиксированный хедер приложения (только мобильный — на десктопе скрыт,
+          там логотип в сайдбаре, а действия в шапке страницы). */}
+      <header className={styles.appHeader}>
+        <button className={styles.menuBtn} onClick={toggleSidebar} aria-label="Открыть меню">
+          <MenuIcon width={22} height={22} />
+        </button>
+        <img src={logoSvg} alt="EdTech Collab" className={styles.appHeaderLogo} />
+        <div className={styles.appHeaderActions}>
+          <IconButton size="sm" aria-label="Профиль" onClick={() => navigate('/profile')}>
+            <img src={profileSvg} alt="" />
+          </IconButton>
+          <IconButton size="sm" aria-label="Настройки" onClick={() => navigate('/settings')}>
+            <img src={settingsSvg} alt="" />
+          </IconButton>
+          <IconButton size="sm" aria-label="Уведомления">
+            <img src={bellSvg} alt="" />
+          </IconButton>
+        </div>
+      </header>
+
       {collapsed ? (
         <button className={styles.reopen} onClick={toggleSidebar} aria-label="Показать меню">
           <MenuIcon width={22} height={22} />
