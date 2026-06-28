@@ -27,3 +27,53 @@
     grid-template-columns: 1fr;
   }
 }
+
+// --- Пустой дашборд (новые пользователи) -------------------------------------
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $space-3;
+  padding: $space-12 $space-6;
+  background: $color-surface;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-2xl;
+}
+
+.emptyEmoji {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: $font-family-heading;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.emptyText {
+  margin: 0;
+  max-width: 420px;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+// --- Мобильная адаптация (< 768px) -------------------------------------------
+@media (max-width: #{$bp-md - 1}) {
+  .page {
+    gap: $space-4;
+  }
+
+  .lessonSection,
+  .bottomSection {
+    gap: $space-4;
+  }
+
+  .empty {
+    padding: $space-8 $space-4;
+  }
+}
