@@ -27,3 +27,117 @@
     grid-template-columns: 1fr;
   }
 }
+
+// --- ВРЕМЕННО (для защиты): карточка общего урока «Защита» --------------------
+.defense {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-5 $space-6;
+  border-radius: $radius-2xl;
+  background: linear-gradient(135deg, $color-primary 0%, #9b7bff 100%);
+  color: $color-text-inverse;
+}
+
+.defenseIcon {
+  font-size: 40px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.defenseText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.defenseTitle {
+  margin: 0;
+  font-family: $font-family-heading;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.defenseSubtitle {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: $line-height-normal;
+}
+
+.defenseBtn {
+  flex-shrink: 0;
+  background: $color-surface !important;
+  border-color: $color-surface !important;
+  color: $color-primary !important;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.9) !important;
+  }
+}
+
+// На узких экранах карточка складывается в столбик, кнопка — на всю ширину.
+@media (max-width: #{$bp-sm - 1}) {
+  .defense {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: $space-4;
+  }
+
+  .defenseBtn {
+    width: 100%;
+  }
+}
+
+// --- Пустой дашборд (новые пользователи) -------------------------------------
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $space-3;
+  padding: $space-12 $space-6;
+  background: $color-surface;
+  border: 1px solid $color-border-soft;
+  border-radius: $radius-2xl;
+}
+
+.emptyEmoji {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: $font-family-heading;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.emptyText {
+  margin: 0;
+  max-width: 420px;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+// --- Мобильная адаптация (< 768px) -------------------------------------------
+@media (max-width: #{$bp-md - 1}) {
+  .page {
+    gap: $space-4;
+  }
+
+  .lessonSection,
+  .bottomSection {
+    gap: $space-4;
+  }
+
+  .empty {
+    padding: $space-8 $space-4;
+  }
+}
