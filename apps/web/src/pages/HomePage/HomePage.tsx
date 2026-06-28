@@ -29,6 +29,12 @@ import styles from './HomePage.module.scss';
 // демо-аккаунтам — добавьте их email сюда.
 const DEMO_EMAILS = new Set(['teacher@test.com']);
 
+// ⚠️ ВРЕМЕННО (для защиты): общий урок с фиксированным id комнаты. Все участники,
+// зайдя по этой ссылке, попадают в один и тот же онлайн-класс (редактор + чат).
+// Сессии с таким id нет в БД → SessionPage подключается в анонимном режиме к
+// общей realtime-комнате. После защиты этот блок и кнопку можно удалить.
+const DEFENSE_SESSION_ID = 'defense';
+
 /**
  * Главная страница (дашборд ученика).
  * Композиция переиспользуемых блоков: PageHeader + QuickActions + расписание +
@@ -59,6 +65,20 @@ export function HomePage() {
             : 'Добро пожаловать на платформу!'
         }
       />
+
+      {/* ⚠️ ВРЕМЕННО (для защиты): общий урок для всех участников. Удалить после. */}
+      <div className={styles.defense}>
+        <span className={styles.defenseIcon} aria-hidden="true">🎓</span>
+        <div className={styles.defenseText}>
+          <h2 className={styles.defenseTitle}>Занятие «Защита»</h2>
+          <p className={styles.defenseSubtitle}>
+            Общий онлайн-класс для всех участников — заходите одновременно в одну комнату.
+          </p>
+        </div>
+        <Button className={styles.defenseBtn} onClick={() => navigate(`/s/${DEFENSE_SESSION_ID}`)}>
+          Присоединиться
+        </Button>
+      </div>
 
       {/* ── CTA преподавателя: создать живое занятие (у студентов скрыто) ──── */}
       <StartClassButton size="md" />
