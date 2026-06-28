@@ -37,6 +37,10 @@ function makeInviteCode(): string {
   return randomBytes(5).toString('base64url').slice(0, 8).toUpperCase();
 }
 
+// ⚠️ ВРЕМЕННО (для защиты): фиксированный invite-код единого занятия «Защита».
+// По нему работает get-or-create общей комнаты (см. POST /sessions/defense).
+const DEFENSE_INVITE_CODE = 'DEFENSE';
+
 function toChatDto(m: {
   id: string;
   sessionId: string;
@@ -128,6 +132,53 @@ export async function sessionsRoutes(app: FastifyInstance): Promise<void> {
       });
 
       return reply.code(201).send(toDto(session));
+    },
+  );
+
+  // ── ВРЕМЕННО (для защиты): единое общее занятие «Защита» ────────────────────
+  // Get-or-create по фиксированному invite-коду: первый вошедший создаёт занятие
+  // в БД и становится владельцем, остальные переиспользуют его. Так у всех —
+  // реальная сессия (роли + видео LiveKit), и все попадают в одну комнату.
+  // Удалить вместе с фронтовой кнопкой после защиты.
+  app.post(
+    '/sessions/defense',
+    {
+      preHandler: [app.authenticate],
+      schema: {
+        tags: ['Sessions'],
+        summary: 'Войти в общее занятие «Защита» (временное)',
+        description:
+          'Get-or-create единого демонстрационного занятия: первый вошедший создаёт сессию, ' +
+          'остальные присоединяются к ней же. Возвращает сессию с реальным id.',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: sessionDtoSchema,
+          401: simpleErrorSchema,
+        },
+      },
+    },
+    async (req, reply) => {
+      let session = await app.prisma.session.findUnique({
+        where: { inviteCode: DEFENSE_INVITE_CODE },
+      });
+      if (!session) {
+        session = await app.prisma.session.create({
+          data: {
+            ownerId: req.user.sub,
+            title: 'Защита',
+            language: 'PYTHON',
+            mode: 'GROUP',
+            inviteCode: DEFENSE_INVITE_CODE,
+          },
+        });
+      } else if (!session.isActive) {
+        // Если занятие ранее закрыли — снова делаем активным (новый запуск).
+        session = await app.prisma.session.update({
+          where: { id: session.id },
+          data: { isActive: true, closedAt: null },
+        });
+      }
+      return reply.send(toDto(session));
     },
   );
 
