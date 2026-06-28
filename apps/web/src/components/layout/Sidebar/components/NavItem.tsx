@@ -8,16 +8,19 @@ export interface NavItemProps {
   label: string;
   /** Совпадение строго по пути (для «Главная» = "/"). */
   end?: boolean;
+  /** Доп. обработчик клика (на мобильном — закрыть выезжающую панель). */
+  onNavigate?: () => void;
 }
 
 /**
  * Один пункт боковой навигации с активным состоянием по текущему URL.
  */
-export function NavItem({ to, icon, label, end }: NavItemProps) {
+export function NavItem({ to, icon, label, end, onNavigate }: NavItemProps) {
   return (
     <NavLink
       to={to}
       end={end}
+      onClick={onNavigate}
       className={({ isActive }) =>
         [styles.item, isActive ? styles.active : ''].filter(Boolean).join(' ')
       }
