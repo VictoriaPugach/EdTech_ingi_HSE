@@ -8,6 +8,11 @@
 ## Что делает (MVP)
 
 - `/start` — приветствие.
+- `/joke` — тянет случайную шутку из внешнего
+  [Joke Delivery API](https://www.freepublicapis.com/joke-delivery-api)
+  (`official-joke-api.appspot.com/random_joke`) и присылает её setup/punchline
+  отдельными сообщениями. Если API недоступен — бот отвечает понятной ошибкой,
+  а не падает.
 - Любое другое текстовое сообщение — эхо (бот отвечает тем же текстом).
 
 Это каркас для будущей интеграции с API Gateway (уведомления об оценках/подсказках,
@@ -17,10 +22,13 @@
 
 ```
 src/
-├── config.py    # Settings (pydantic-settings): TELEGRAM_BOT_TOKEN и др. из env
-├── handlers.py  # Router: cmd_start (/start), echo (остальные сообщения)
-└── main.py      # Bot/Dispatcher, long polling (dp.start_polling)
+├── config.py    # Settings (pydantic-settings): TELEGRAM_BOT_TOKEN, JOKE_API_URL и др. из env
+├── handlers.py  # Router: cmd_start (/start), cmd_joke (/joke), echo (остальные сообщения)
+└── main.py      # Bot/Dispatcher, httpx.AsyncClient, long polling (dp.start_polling)
 ```
+
+HTTP-клиент (`httpx.AsyncClient`) создаётся один раз в `main.py` и прокидывается
+в хендлеры через встроенный DI aiogram (параметр `http_client` в сигнатуре хендлера).
 
 ## Запуск и проверка
 
@@ -40,3 +48,4 @@ ruff check src tests && black --check src tests
 |---|---|---|
 | `TELEGRAM_BOT_TOKEN` | да | Токен бота от [@BotFather](https://t.me/BotFather) |
 | `LOG_LEVEL` | нет (default `info`) | Уровень логирования |
+| `JOKE_API_URL` | нет (default `https://official-joke-api.appspot.com/random_joke`) | Эндпоинт Joke Delivery API для `/joke` |

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     env: str = "development"
     log_level: str = "info"
     telegram_bot_token: str
+    joke_api_url: str = "https://official-joke-api.appspot.com/random_joke"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
