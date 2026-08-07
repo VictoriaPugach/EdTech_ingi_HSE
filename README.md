@@ -28,6 +28,7 @@
 | **BC-2 Pedagogical Analysis** | `hint-service` (Python)   | AST-анализ (Tree-sitter), детекция типовых ошибок, генерация подсказок |
 | **BC-3 Learning Management**   | `api-gateway` (Node.js)   | Auth (JWT), сессии, проекты, геймификация, маршрутизация |
 |                                | `web` (React SPA)         | Клиент: редактор кода (CodeMirror 6), UI, геймификация |
+| — (вспомогательный)            | `telegram-bot` (Python)   | Telegram-бот: long polling, `/start`, эхо (каркас для уведомлений) |
 
 Контексты общаются **только** через API Gateway или события (Redis Pub/Sub) —
 никаких прямых импортов моделей между сервисами.
@@ -59,6 +60,7 @@
 | **Realtime Sync (BC-1)** | Node.js 20, `ws`, Yjs 13, `y-protocols` | WebSocket-сервер, broadcast |
 | **API Gateway / LMS (BC-3)** | Node.js 20, Fastify 4, Prisma 5, JWT | REST API, аутентификация, проксирование |
 | **Hint Service (BC-2)** | Python 3.12, FastAPI, Tree-sitter, uvicorn | AST-анализ, подсказки |
+| **Telegram Bot** | Python 3.12, aiogram 3 | Long polling, `/start`, эхо |
 | **Базы данных** | PostgreSQL 16, Redis 7 | Хранение данных, Pub/Sub |
 | **Инфраструктура** | Docker Compose (dev), Kubernetes (prod, planned) | Контейнеризация, оркестрация |
 | **CI/CD** | GitHub Actions | Линт, тесты, сборка образов |
@@ -73,7 +75,8 @@ edtech-collab/
 │   ├── web/                  # BC-3 Client (React + Vite + CodeMirror 6 + Yjs)
 │   ├── realtime-sync/        # BC-1 (Node.js + ws + Yjs)
 │   ├── api-gateway/          # BC-3 (Node.js + Fastify + Prisma + JWT)
-│   └── hint-service/         # BC-2 (Python + FastAPI + Tree-sitter)
+│   ├── hint-service/         # BC-2 (Python + FastAPI + Tree-sitter)
+│   └── telegram-bot/         # Python + aiogram 3 (long polling)
 ├── packages/
 │   └── shared/               # Общие TypeScript-типы
 ├── infra/
@@ -136,6 +139,7 @@ npm run format              # Prettier
 | `api-gateway` | 4000 | http://localhost:4000 | REST API + Swagger UI на `/docs` |
 | `realtime-sync` | 4001 | ws://localhost:4001/ws | WebSocket для Yjs-синхронизации |
 | `hint-service` | 4002 | http://localhost:4002 | REST API подсказок + Swagger на `/docs` |
+| `telegram-bot` | — | — | Long polling, порт не открывается |
 | `postgres` | 5432 | postgresql://… | Основная БД |
 | `redis` | 6379 | redis://… | Pub/Sub для CRDT, кэш |
 

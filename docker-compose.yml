@@ -159,6 +159,23 @@ services:
     networks: [edtech-net]
 
   # ---------------------------------------------------------------------------
+  # Telegram Bot — Python + aiogram 3, long polling
+  # ---------------------------------------------------------------------------
+  telegram-bot:
+    build:
+      context: ./apps/telegram-bot
+      dockerfile: Dockerfile
+      target: dev
+    container_name: edtech-telegram-bot
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    volumes:
+      - ./apps/telegram-bot:/app
+    networks: [edtech-net]
+
+  # ---------------------------------------------------------------------------
   # Web SPA (BC-3 client) — React + Vite + CodeMirror 6 + Yjs
   # ---------------------------------------------------------------------------
   web:

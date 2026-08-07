@@ -109,6 +109,19 @@ services:
       HINT_SERVICE_PORT: 4002
     networks: [edtech]
 
+  telegram-bot:
+    image: ${IMAGE_PREFIX:-edtech}/telegram-bot:${IMAGE_TAG:-local}
+    build:
+      context: ../apps/telegram-bot
+      dockerfile: Dockerfile
+      target: prod
+    restart: unless-stopped
+    environment:
+      ENV: production
+      LOG_LEVEL: info
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    networks: [edtech]
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped

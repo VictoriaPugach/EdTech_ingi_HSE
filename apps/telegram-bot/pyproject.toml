@@ -1,0 +1,44 @@
+[project]
+name = "edtech-telegram-bot"
+version = "0.1.0"
+description = "Telegram-бот EdTech Collab: long polling, /start, эхо."
+requires-python = ">=3.11"
+dependencies = [
+  "aiogram>=3.13,<4",
+  "pydantic>=2.7,<3",
+  "pydantic-settings>=2.4,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.23,<1",
+  "ruff>=0.6,<1",
+  "black>=24.8,<25",
+  "mypy>=1.11,<2",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "B", "UP"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"

@@ -42,11 +42,14 @@ jobs:
   # Python: lint (ruff), format-check (black), tests (pytest)
   # ----------------------------------------------------------------------------
   python:
-    name: Python — lint & test (hint-service)
+    name: Python — lint & test (${{ matrix.service }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [hint-service, telegram-bot]
     defaults:
       run:
-        working-directory: apps/hint-service
+        working-directory: apps/${{ matrix.service }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +58,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
-          cache-dependency-path: apps/hint-service/requirements-dev.txt
+          cache-dependency-path: apps/${{ matrix.service }}/requirements-dev.txt
 
       - name: Install dependencies
         run: |
@@ -140,6 +143,19 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.prefix }}/hint-service:${{ github.sha }}
             ${{ steps.meta.outputs.prefix }}/hint-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push telegram-bot (prod)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/telegram-bot
+          file: apps/telegram-bot/Dockerfile
+          target: prod
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ${{ steps.meta.outputs.prefix }}/telegram-bot:${{ github.sha }}
+            ${{ steps.meta.outputs.prefix }}/telegram-bot:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

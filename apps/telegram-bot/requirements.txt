@@ -1,0 +1,5 @@
+# Production runtime — pin до минорной версии.
+# Полный список см. в pyproject.toml.
+aiogram>=3.13,<4
+pydantic>=2.7,<3
+pydantic-settings>=2.4,<3

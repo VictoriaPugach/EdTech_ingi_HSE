@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest>=8.3,<9
+pytest-asyncio>=0.23,<1
+ruff>=0.6,<1
+black>=24.8,<25
+mypy>=1.11,<2
